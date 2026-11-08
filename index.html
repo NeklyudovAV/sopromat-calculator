@@ -1,0 +1,1921 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Калькулятор сопромата</title>
+<style>
+:root{color-scheme:light;--bg:#f5f6f8;--c:#fff;--t:#1c2330;--m:#667085;--b:#d9dde5;--a:#2563eb;--ink:#111;--axis-ink:#333;--secondary-ink:#475569;--muted-ink:#64748b;--cut-ink:#111827;--guide:#bbb;--red:#dc2626;--green:#15803d;--orange:#d97706;--error:#b42318;--header:#eef1f6;--selected:#eef3ff;--hover:#9db8f5;--cut-bg:#fafbfc}
+@media screen{
+  :root[data-theme="dark"]{color-scheme:dark;--bg:#0f141d;--c:#18212f;--t:#eaf0f8;--m:#aebbd0;--b:#3c4b61;--a:#79a8ff;--ink:#edf2fa;--axis-ink:#c7d5e9;--secondary-ink:#bac9df;--muted-ink:#a5b6ce;--cut-ink:#edf2fa;--guide:#70829d;--red:#e05252;--green:#32975a;--orange:#d48036;--error:#ffa29a;--header:#222f42;--selected:#263b5a;--hover:#7da7ec;--cut-bg:#141c29}
+}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px}
+#themeToggle{flex:none}
+.header-actions{display:flex;gap:6px;align-items:center;min-width:0}
+#seedCopy{font-family:ui-monospace,monospace;max-width:11rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#seedForm{margin-bottom:10px}
+#seedForm input{flex:1;min-width:0}
+#seedStatus:empty{display:none}
+@media screen and (max-width:760px){
+  .page-header{flex-wrap:wrap}
+  .header-actions{width:100%;justify-content:flex-end}
+  #seedCopy{flex:1;max-width:none}
+}
+#themeToggle[aria-pressed="true"]{background:var(--selected);color:var(--a)}
+svg text:not([fill]){fill:var(--ink)}
+*{box-sizing:border-box}button:disabled{opacity:.4;cursor:not-allowed}svg line,svg path{stroke-linecap:round;stroke-linejoin:round}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--t);font:15px/1.5 "Roboto Condensed","Arial Narrow",system-ui,sans-serif}
+.w{max-width:1240px;margin:0 auto;padding:16px}
+h1{font-size:20px;margin:4px 0 12px}h2{font-size:16px;margin:0 0 10px}
+.card{background:var(--c);border:1px solid var(--b);border-radius:10px;padding:14px;margin-bottom:14px}
+.g{display:flex;flex-wrap:wrap;gap:10px}.g>label{flex:1 1 120px}.nowrap{white-space:nowrap;min-width:190px}.unit-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;width:100%;margin-top:8px}.unit-row>label{min-width:0}#beamSupports{margin-top:10px}.config-row{display:flex;flex-wrap:wrap;gap:10px}.config-row>label{flex:1 1 150px}@media(max-width:760px){.unit-row{grid-template-columns:repeat(2,minmax(130px,1fr))}}
+label{font-size:13px;color:var(--m);display:flex;flex-direction:column;gap:2px}
+input,select{font:inherit;padding:6px 8px;border:1px solid var(--b);border-radius:6px;background:var(--c);color:var(--t);width:100%}
+button{font:inherit;padding:7px 14px;border:1px solid var(--a);background:var(--a);color:var(--c);border-radius:6px;cursor:pointer}
+button.s{background:var(--c);color:var(--a)}
+.sc{overflow-x:auto}
+#startLoads{min-width:0;margin:10px 0;padding:8px;border:1px solid var(--b);border-radius:8px}
+#startLoads legend{padding:0 4px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border:1px solid var(--b);padding:4px 6px;text-align:center;white-space:nowrap}
+th{background:var(--header);font-weight:600}
+td input{min-width:80px;text-align:center}
+.r{font-family:"Roboto Condensed","Arial Narrow",sans-serif;font-size:18px;line-height:1.7}
+.r p{margin:0 0 8px}.r table{font-size:inherit}.r .sc{margin-bottom:12px}
+.n{color:var(--m);font-size:13px}
+.err{color:var(--error)}
+.card[aria-invalid="true"],input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--error);outline:2px solid var(--error);outline-offset:1px}
+svg{width:100%;height:auto;display:block}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:14px}.tile{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;background:var(--c);color:var(--t);border:2px solid var(--b);border-radius:12px;padding:14px 16px}.tile:hover{border-color:var(--hover)}.tile.on{border-color:var(--a);background:var(--selected)}.tile svg{width:140px;height:40px;margin-bottom:4px}.tile b{font-size:17px}.tile span{font-size:13px;color:var(--m)}
+.tile[data-t="tor"] span{font-size:12px}
+.cutbox{border:1px solid var(--b);border-radius:8px;padding:10px;margin:10px 0 14px;background:var(--cut-bg)}.cutbox svg{max-width:1140px}.cutread{font-weight:600;color:var(--t)}
+.frac{display:inline-grid;grid-template-rows:auto auto;vertical-align:middle;text-align:center;line-height:1.1;margin:0 .12em}
+.frac>span:first-child{border-bottom:1px solid currentColor;padding:0 .15em .08em}
+.frac>span:last-child{padding:.08em .15em 0}
+.effort-sub{font-size:.8em;line-height:0}
+.plot-label{font:9px/1.1 sans-serif;white-space:nowrap;text-align:center;color:var(--ink)}
+.diagram-scroll{max-width:100%;overflow-x:auto}
+.mobile-scroll-hint,.mobile-field{display:none}
+@media screen and (max-width:760px){
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+  .w{
+    padding:12px;
+    padding-top:max(12px,env(safe-area-inset-top));
+    padding-right:max(12px,env(safe-area-inset-right));
+    padding-bottom:max(12px,env(safe-area-inset-bottom));
+    padding-left:max(12px,env(safe-area-inset-left));
+  }
+  .card{padding:10px;min-width:0}
+  .tiles{grid-template-columns:minmax(0,1fr);gap:6px}
+  .tile{display:grid;grid-template-columns:86px minmax(0,1fr);column-gap:10px;align-items:center;padding:8px 10px}
+  .tile svg{grid-row:span 2;width:86px;height:auto;margin:0}
+  .tile b{font-size:16px}
+  .tile span{line-height:1.25}
+  .config-row,.unit-row,#beamSupports{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .config-row>label,.unit-row>label,#beamSupports>label,#frameSupports>label{min-width:0}
+  input,select,button{min-height:44px;font-size:16px}
+  #modulusLabel>div>*{min-width:0}
+  #modulusLabel select{max-width:54%}
+  #segmentEditor{overflow:visible}
+  #segmentEditor table,#segmentEditor tbody{display:block}
+  #segmentEditor thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+  #segmentEditor tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 8px;margin-bottom:8px;padding:8px;border:1px solid var(--b);border-radius:8px}
+  #segmentEditor td{border:0;padding:0;text-align:left;min-width:0;white-space:normal}
+  #segmentEditor td:first-child{grid-column:1/-1;font-weight:600}
+  #segmentEditor td:last-child{grid-column:1/-1;justify-self:end}
+  #segmentEditor td input{min-width:0}
+  #segmentEditor td label{line-height:1.2}
+  .diagram-scroll>svg{width:100%;height:auto}
+  .cutbox .diagram-scroll>svg{width:150%;max-width:none}
+  .mobile-field{display:inline}
+  .mobile-scroll-hint{display:block;margin:4px 0 8px}
+  .r{overflow-wrap:anywhere}
+  .r .frac{max-width:100%;overflow-wrap:anywhere}
+}
+#printReport{display:none}
+@page{size:A4;margin:0}
+@media print and (prefers-color-scheme:dark){
+  :root{color-scheme:dark;--bg:#0f141d;--c:#18212f;--t:#eaf0f8;--m:#aebbd0;--b:#3c4b61;--a:#79a8ff;--ink:#edf2fa;--axis-ink:#c7d5e9;--secondary-ink:#bac9df;--muted-ink:#a5b6ce;--cut-ink:#edf2fa;--guide:#70829d;--red:#e05252;--green:#32975a;--orange:#d48036;--error:#ffa29a;--header:#222f42;--selected:#263b5a;--hover:#7da7ec;--cut-bg:#141c29}
+}
+@media print{
+  html,body{margin:0;background:var(--bg);color:var(--t);print-color-adjust:exact;-webkit-print-color-adjust:exact}
+  body>.w{display:none}
+  #printReport{display:block}
+  .print-page{width:210mm;min-height:297mm;padding:10mm 12mm;background:var(--bg);break-after:page;font-size:9pt;line-height:1.25}
+  .print-page:last-child{break-after:auto}
+  .print-page h1,.print-page h2,.print-page h4{margin:0 0 2mm}
+  .print-page h1{font-size:16pt}.print-page h2{font-size:12pt}
+  .print-page p{margin:0 0 2mm}
+  .print-page table{font-size:8.5pt;margin-bottom:3mm}
+  .print-page td,.print-page th{white-space:normal;padding:1mm}
+  .print-page .diagram-scroll,.print-page .sc{overflow:visible}
+  .print-page .diagram-scroll>svg{width:100%;height:auto;max-width:none}
+  .print-page .cutbox{margin:0 0 2mm;padding:1mm;max-width:145mm}
+  .print-detail{break-inside:avoid;margin-bottom:3mm}
+  .print-seed{break-inside:avoid;margin-top:3mm;font-size:8pt;overflow-wrap:anywhere}
+  .print-overview .diagram-scroll{max-width:110mm;margin:auto}
+  .print-diagrams-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5mm;break-inside:avoid}
+  .print-diagrams-grid .diagram-scroll{min-width:0}
+  .print-diagrams-grid svg{max-height:115mm}
+  .print-frame-member .cutbox{max-width:none}
+  .print-frame-member .cutbox svg{max-height:160mm}
+  .print-functions{columns:2;column-gap:5mm;font-size:8pt}
+  .print-functions p{break-inside:avoid;overflow-wrap:anywhere}
+  .print-settings th,.print-settings td{text-align:left}
+}
+</style>
+</head>
+<body>
+<div class="w">
+<div class="page-header">
+  <h1 id="h1">Растяжение-сжатие ступенчатого стержня</h1>
+  <div class="header-actions noprint">
+    <button type="button" id="seedOpen" class="s" aria-expanded="false" aria-controls="seedForm">Ввести seed</button>
+    <button type="button" id="seedCopy" class="s" aria-label="Скопировать seed схемы" title="Скопировать seed схемы"></button>
+    <button type="button" id="themeToggle" class="s" aria-pressed="false">Тёмная тема</button>
+  </div>
+</div>
+<form id="seedForm" class="g noprint" hidden>
+  <input id="seedInput" type="text" placeholder="Вставьте seed схемы" aria-label="Seed схемы" autocapitalize="off" autocomplete="off" spellcheck="false" required>
+  <button type="submit">Восстановить</button>
+</form>
+<p id="seedStatus" class="n noprint" role="status"></p>
+<div class="tiles noprint" id="tiles">
+<button type="button" class="tile on" data-t="ax"><svg viewBox="0 0 140 40" width="140" height="40"><line x1="14" y1="4" x2="14" y2="36" stroke="var(--axis-ink)" stroke-width="2"/><rect x="14" y="13" width="50" height="14" fill="var(--c)" stroke="var(--ink)"/><rect x="64" y="9" width="46" height="22" fill="var(--c)" stroke="var(--ink)"/><line x1="110" y1="20" x2="136" y2="20" stroke="var(--red)" stroke-width="2.5"/><path d="M136,20l-6,-4v8z" fill="var(--red)"/></svg><b>Растяжение-сжатие</b><span>Ступенчатый стержень: N, σ, ε, Δl, перемещения</span></button>
+<button type="button" class="tile" data-t="tor"><svg viewBox="0 0 140 40" width="140" height="40"><line x1="14" y1="4" x2="14" y2="36" stroke="var(--axis-ink)" stroke-width="2"/><rect x="14" y="11" width="50" height="18" fill="var(--c)" stroke="var(--ink)"/><rect x="64" y="14" width="46" height="12" fill="var(--c)" stroke="var(--ink)"/><g stroke="var(--red)" stroke-width="1.2" fill="var(--c)"><circle cx="125" cy="8" r="4"/><circle cx="125" cy="32" r="4"/><path d="M123.4 30.4l3.2 3.2m0-3.2-3.2 3.2"/></g><circle cx="125" cy="8" r="1.2" fill="var(--red)"/></svg><b>Кручение</b><span>Ступенчатый вал: Mк, τ, γ, углы закручивания φ</span></button>
+<button type="button" class="tile" data-t="bend"><svg viewBox="0 0 140 40" aria-hidden="true"><path d="M12 23h113M12 13v20m0-17-5 4m5 2-5 4m5 2-5 4" fill="none" stroke="var(--ink)" stroke-width="1.8"/><g fill="none" stroke="var(--red)" stroke-width="1.5"><path d="M48 5v17m-3-4 3 4 3-4M103 15h-14m14 0v16h14m-24-19-4 3 4 3m20 10 4 3-4 3"/></g></svg><b>Изгиб</b><span>Балка: поперечная сила Q, изгибающий момент M</span></button>
+<button type="button" class="tile" data-t="frame"><svg viewBox="0 0 140 56" aria-hidden="true">
+  <path d="M30 42V16h78v26" fill="none" stroke="var(--ink)" stroke-width="2"/>
+  <g fill="var(--c)" stroke="var(--ink)" stroke-width="1.2">
+    <path d="M30 42l-5 7h10Z M108 42l-5 7h10Z"/><path d="M22 50h16m62 4h16"/>
+    <circle cx="105" cy="51" r="1.3"/><circle cx="111" cy="51" r="1.3"/>
+  </g>
+  <path d="M30 5h78M30 5v10m-2-3 2 3 2-3M43 5v10m-2-3 2 3 2-3M56 5v10m-2-3 2 3 2-3M69 5v10m-2-3 2 3 2-3M82 5v10m-2-3 2 3 2-3M95 5v10m-2-3 2 3 2-3M108 5v10m-2-3 2 3 2-3" fill="none" stroke="var(--green)" stroke-width="1.2"/>
+  <path d="M8 16h20m-4-3 4 3-4 3" fill="none" stroke="var(--red)" stroke-width="1.5"/>
+  <path d="M108 37v10m0-10h-10m3-2-3 2 3 2m7 8h10m-3-2 3 2-3 2" transform="rotate(-20 108 42)" fill="none" stroke="var(--red)" stroke-width="1.3"/>
+</svg><b>Плоские рамы</b><span>Рамы с ветвями, эпюры N, Q, M</span></button>
+</div>
+<select id="task" hidden><option value="ax">Растяжение-сжатие</option><option value="tor">Кручение</option><option value="bend">Изгиб</option><option value="frame">Плоские рамы</option></select>
+
+<div class="card">
+  <div class="config-row">
+    <label>Режим<select id="mode"><option value="num">Числа</option><option value="sym">Буквы</option></select></label>
+    <label><span id="axisLabel">Продольная ось</span><select id="axis"><option value="x">X</option><option value="z">Z</option></select></label>
+    <label>Расчёт по<select id="solveBy"><option value="internal">Внутренним усилиям</option><option value="external">Внешним усилиям</option></select></label>
+    <label id="beamTypeLabel" hidden>Опорная схема<select id="beamType"><option value="fixed">Консоль</option><option value="pins">Шарнирная схема</option></select></label>
+    <label id="supportLabel">Заделка<select id="support"><option value="left">Слева</option><option value="right">Справа</option></select></label>
+    <label>Анализ<select id="dir"><option value="ltr">слева-направо</option><option value="rtl">справа-налево</option></select></label>
+  </div>
+  <div class="g" id="beamSupports" hidden>
+    <label id="pinALabel" hidden>Неподвижная опора<select id="pinA"></select></label>
+    <label id="pinBLabel" hidden>Подвижная опора<select id="pinB"></select></label>
+  </div>
+  <div class="g" id="frameSupports" hidden>
+    <label>Опорная схема<select id="frameType"><option value="fixed">Жёсткая заделка</option><option value="pins">Неподвижная и подвижная опоры</option><option value="rollers">Три подвижные опоры</option><option value="none">Не выбраны</option></select></label>
+    <label id="frameALabel">Узел первой опоры<select id="frameA"></select></label>
+    <label id="frameBLabel">Узел второй опоры<select id="frameB"></select></label>
+    <label id="frameCLabel">Узел третьей опоры<select id="frameC"></select></label>
+    <label id="frameRollLabel">Направление реакции подвижной опоры / первых двух подвижных опор<select id="frameRoll"><option value="y">Вертикальное</option><option value="h">Горизонтальное</option></select></label>
+  </div>
+  <div class="unit-row">
+    <label>Единицы длины<select id="uL"></select></label>
+    <label id="beamMomentUnitLabel" hidden>Единицы момента<select id="beamMomentUnit"><option>кН·м</option><option>Н·м</option><option>Н·мм</option></select></label>
+    <label id="forceUnitsLabel"><span id="tF">Единицы силы</span><select id="uF"></select></label>
+    <label id="areaUnitsLabel"><span id="tA">Единицы площади</span><select id="uA"></select></label>
+    <label id="modulusLabel"><span id="tE">Модуль E</span><div style="display:flex;gap:4px"><input id="E" type="number" step="any" value="200"><select id="uE" style="width:90px"></select></div></label>
+  </div>
+</div>
+
+<div class="card">
+  <h2 id="constructorTitle">Конструктор: участки от заделки к свободному концу</h2>
+  <div class="sc" id="segmentEditor"><table>
+    <thead><tr id="standardHead"><th>№</th><th>Длина L</th><th id="hA">Площадь A</th><th><span id="hq">Распр. нагрузка q</span><br><span class="n" id="qu"></span></th><th><span id="hF">Сосредоточ. сила F</span><br><span class="n" id="loadLocation">на конце со стороны свободного конца</span></th><th id="beamMomentHeader" hidden>Сосредоточенный момент</th><th class="noprint"></th></tr><tr id="frameHead" hidden><th>Стержень</th><th>От узла</th><th>Направление</th><th>Длина L</th><th>Поперечная q</th><th>Горизонтальная сила</th><th>Вертикальная сила</th><th>Момент</th><th class="noprint"></th></tr></thead>
+    <tbody id="tb"></tbody>
+  </table></div>
+  <fieldset id="startLoads" class="g" hidden>
+    <legend id="startLoadsTitle">Нагрузки в начале первого участка</legend>
+    <label id="startHLabel"><span id="startHName">Горизонтальная сила</span><input id="startH" type="text" value="0" autocapitalize="off" spellcheck="false"></label>
+    <label><span id="startVName">Вертикальная сила</span><input id="startV" type="text" value="0" autocapitalize="off" spellcheck="false"></label>
+    <label><span id="startMName">Сосредоточенный момент</span><input id="startM" type="text" value="0" autocapitalize="off" spellcheck="false"></label>
+  </fieldset>
+  <p class="n" id="hint"></p>
+  <div class="g noprint"><button class="s" id="addBtn" onclick="add()">+ Добавить участок</button><button type="button" onclick="generateExercise()">Тренажер</button><button onclick="printCalculator()">Печать / PDF</button></div>
+</div>
+
+<div class="card" id="schemeCard"><h2>Схема и эпюры</h2><p id="err" class="err" role="status" hidden></p><div id="svgs"></div></div>
+<div id="out">
+  <div class="card" id="solutionCard"><h2>Решение</h2><div class="r" id="sol"></div></div>
+</div>
+</div>
+
+<div id="printReport"></div>
+<script>
+const $=s=>document.querySelector(s);
+function setTheme(dark){
+  document.documentElement.dataset.theme=dark?'dark':'light';
+  $('#themeToggle').setAttribute('aria-pressed',String(dark));
+}
+try{setTheme(localStorage.getItem('sopromat-theme')==='dark')}catch{setTheme(false)}
+$('#themeToggle').onclick=()=>{
+  const dark=document.documentElement.dataset.theme!=='dark';
+  setTheme(dark);
+  try{localStorage.setItem('sopromat-theme',dark?'dark':'light')}catch{}
+};
+const LU={'м':1,'см':.01,'мм':.001};
+const UK={ax:{L:LU,F:{'Н':1,'кН':1e3},A:{'мм²':1e-6,'см²':1e-4,'м²':1},E:{'ГПа':1e9,'МПа':1e6}},
+  tor:{L:LU,F:{'Н·м':1,'кН·м':1e3,'Н·мм':1e-3},A:{'мм':1e-3,'см':.01,'м':1},E:{'ГПа':1e9,'МПа':1e6}}};
+UK.bend=UK.frame=UK.ax;
+const DEF={ax:{L:'м',F:'кН',A:'см²',E:'ГПа'},tor:{L:'м',F:'кН·м',A:'см',E:'ГПа'}};
+DEF.bend=DEF.frame=DEF.ax;
+let U=UK.ax;
+const TX={ax:{h1:'Растяжение-сжатие ступенчатого стержня',tF:'Единицы силы',tA:'Единицы площади',tE:'Модуль E',hA:'Площадь A',hq:'Распр. нагрузка q',hF:'Сосредоточ. сила F',mod:'E',e:'200'},
+  tor:{h1:'Кручение ступенчатого вала',tF:'Единицы момента',tA:'Единицы диаметра d',tE:'Модуль сдвига G',hA:'Диаметр d',hq:'Распр. момент m',hF:'Сосредоточ. момент M',mod:'G',e:'80'}};
+const PRE={ax:{num:[{L:1,A:4,q:0,F:0},{L:1.5,A:2,q:10,F:30},{L:1,A:3,q:0,F:10}],sym:[{L:'l',A:'2A',q:'0',F:'0'},{L:'2l',A:'A',q:'q',F:'ql'},{L:'l',A:'1,5A',q:'0',F:'2ql'}]},
+  tor:{num:[{L:1,A:8,q:0,F:0},{L:1.5,A:5,q:.5,F:2},{L:1,A:6,q:0,F:1}],sym:[{L:'l',A:'2d',q:'0',F:'0'},{L:'2l',A:'d',q:'m',F:'M'},{L:'l',A:'1,5d',q:'0',F:'2M'}]}};
+TX.bend={...TX.ax,h1:'Изгиб балки',hq:'Распределённая сила q'};
+PRE.bend={num:[{L:2,q:-4,F:0,M:0},{L:2,q:0,F:-6,M:2}],sym:[{L:'l',q:'−q',F:'0',M:'0'},{L:'l',q:'0',F:'−F',M:'M'}]};
+TX.frame={...TX.ax,h1:'Плоские рамы'};
+PRE.frame={
+  num:[{P:0,D:'up',L:2,q:0,H:0,V:0,M:0},{P:1,D:'right',L:3,q:-4,H:5,V:-8,M:0}],
+  sym:[{P:0,D:'up',L:'2l',q:'0',H:'0',V:'0',M:'0'},{P:1,D:'right',L:'3l',q:'−q',H:'ql',V:'−2ql',M:'0'}]
+};
+const isFrame=()=>$('#task').value==='frame';
+const isBeam=()=>$('#task').value==='bend';
+const HINT={ax:$('#hint').innerHTML,tor:'',bend:'',frame:''};
+function fillUnits(){const t=$('#task').value;U=UK[t];for(const k in U){const s=$('#u'+k);s.innerHTML='';for(const n in U[k])s.add(new Option(n,n));s.value=DEF[t][k]}}
+['L','F','A','E'].forEach(k=>$('#u'+k).onchange=calc);
+function setTask(){const t=$('#task').value;document.querySelectorAll('.tile').forEach(b=>b.classList.toggle('on',b.dataset.t==t));fillUnits();for(const k in TX[t])if($('#'+k))$('#'+k).textContent=TX[t][k];$('#hint').innerHTML=HINT[t];$('#hint').hidden=!HINT[t]}
+const MK=(id,c)=>`<marker id="${id}" viewBox="0 0 10 8" markerWidth="10" markerHeight="8" refX="1.6" refY="4" markerUnits="userSpaceOnUse" orient="auto"><path d="M1.2,1.5L8.8,4L1.2,6.5Z" fill="${c}" stroke="${c}" stroke-width="1.3" stroke-linejoin="round"/></marker>`;
+const subscript=n=>String(n).replace(/\d/g,d=>'₀₁₂₃₄₅₆₇₈₉'[d]);
+function cutMeasure(a,b,y,text,marker){
+  const middle=(a+b)/2;
+  const color=marker?'var(--a)':'var(--secondary-ink)';
+  const ends=marker?'':`<path d="M${a},${y-4}v8 M${b},${y-4}v8" stroke="${color}"/>`;
+  return ends+`<line x1="${a}" y1="${y}" x2="${b}" y2="${y}" stroke="${color}" ${marker?'marker-end="url(#'+marker+')"':''}/><text x="${middle}" y="${y-6}" text-anchor="middle" font-size="11" fill="${color}">${text}</text>`;
+}
+const arc=(x,y,dir,col,mk,ry,r)=>{r=r||8;const c=r*.7,mark=(cy,out)=>`<circle cx="${x}" cy="${cy}" r="${r}" fill="var(--c)" stroke="${col}" stroke-width="1.8"/>`+(out?`<circle cx="${x}" cy="${cy}" r="${r*.35}" fill="${col}"/>`:`<path d="M${x-c},${cy-c}L${x+c},${cy+c}M${x-c},${cy+c}L${x+c},${cy-c}" stroke="${col}" stroke-width="1.8"/>`);
+  return mark(y-ry,dir>0)+mark(y+ry,dir<=0)};
+$('#E').oninput=calc;
+['axis','solveBy'].forEach(id=>$('#'+id).onchange=calc);
+const mirrored=()=>$('#support').value==='right';
+const analysisFromLeft=()=>$('#dir').value==='ltr';
+const nodeLetter=(index,count)=>String.fromCharCode(65+(analysisFromLeft()?index:count-index));
+const fromSupport=()=>analysisFromLeft()!==mirrored();
+$('#support').onchange=$('#dir').onchange=()=>{build();calc()};
+let rows=[{L:1,A:4,q:0,F:0},{L:1.5,A:2,q:10,F:30},{L:1,A:3,q:0,F:10}];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const f=v=>{if(Math.abs(v)<1e-12)return'0';return String(+v.toPrecision(4)).replace('.',',').replace('-','−')};
+
+function build(){
+  $('#standardHead').hidden=isFrame();
+  $('#frameHead').hidden=!isFrame();
+  if(isFrame()){buildFrame();return}
+  const idx=rows.map((r,i)=>i);if(isBeam()?!analysisFromLeft():!fromSupport())idx.reverse();
+  const t=$('#task').value, labels={L:'Длина L',A:TX[t].hA,q:TX[t].hq,F:TX[t].hF,M:'Сосредоточенный момент'};
+  const location=isBeam()?'на правом конце участка':'на конце со стороны свободного конца';
+  const keys=isBeam()?['L','q','F','M']:['L','A','q','F'];
+  $('#tb').innerHTML=idx.map((i,pos)=>{
+    const r=rows[i];
+    const fields=keys.map(k=>`<td><label><span class="mobile-field">${labels[k]}${k==='q'?' <span class="mobile-q-unit"></span>':''}${k==='F'||k==='M'?'<br><small>'+location+'</small>':''}</span><input type="text" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="${labels[k]}" value="${esc(r[k])}" data-i="${i}" data-k="${k}"></label></td>`).join('');
+    return `<tr><td><span class="mobile-field">Участок </span>${pos+1}</td>${fields}<td class="noprint"><button class="s" aria-label="Удалить участок ${pos+1}" onclick="del(${i})">✕</button></td></tr>`;
+  }).join('');
+  $('#hA').hidden=isBeam();$('#beamMomentHeader').hidden=!isBeam();
+  $('#addBtn').disabled=rows.length>=10;
+}
+$('#tb').oninput=e=>{const t=e.target;rows[t.dataset.i][t.dataset.k]=t.value;calc()};
+function add(){if(rows.length>=10)return;if(isFrame()){rows.push({P:rows.length,D:'right',L:1,q:0,H:0,V:0,M:0});build();calc();return}const l=rows[rows.length-1]||{L:1,A:1},z=$('#mode').value=='sym'?'0':0;rows.push({L:l.L,A:l.A,q:z,F:z,M:z});build();calc()}
+function del(i){if(rows.length>1){if(isFrame()&&i!==rows.length-1)return;rows.splice(i,1);build();calc()}}
+
+// ---- буквенная алгебра: многочлены с целыми степенями переменных ----
+const K=e=>Object.keys(e).filter(v=>e[v]).sort().map(v=>v+e[v]).join(',');
+const pc=c=>c?{'':{c,e:{}}}:{},pv=n=>({[n+'1']:{c:1,e:{[n]:1}}});
+const clean=r=>{for(const k in r)if(Math.abs(r[k].c)<1e-12)delete r[k];return r};
+function padd(a,b){const r={};for(const p of[a,b])for(const k in p){(r[k]||(r[k]={c:0,e:p[k].e})).c+=p[k].c}return clean(r)}
+function pmul(a,b){const r={};for(const i in a)for(const j in b){const e={...a[i].e};for(const v in b[j].e)e[v]=(e[v]||0)+b[j].e[v];const k=K(e);(r[k]||(r[k]={c:0,e:Object.fromEntries(Object.entries(e).filter(x=>x[1]))})).c+=a[i].c*b[j].c}return clean(r)}
+const pneg=a=>pmul(a,pc(-1)),psc=(a,s)=>pmul(a,pc(s));
+function pdiv(a,b){const ks=Object.keys(b);if(ks.length!=1)throw Error('Делить можно только на одночлен (например 2A, EA), не на сумму.');const t=b[ks[0]],e={};for(const v in t.e)e[v]=-t.e[v];return pmul(a,{[K(e)]:{c:1/t.c,e}})}
+function ppow(a,n){let r=pc(1);for(let i=0;i<Math.abs(n);i++)r=pmul(r,a);return n<0?pdiv(pc(1),r):r}
+const peval=(p,v)=>Object.values(p).reduce((s,t)=>s+t.c*Object.entries(t.e).reduce((m,[n,x])=>m*Math.pow(v[n],x),1),0);
+function parse(s){s=String(s);
+  const src=s.replace(/−/g,'-').replace(/²/g,'^2').replace(/³/g,'^3'),re=/\d+[.,]?\d*|[A-Za-zπ]|[-+*/^()]/g,T=src.match(re)||[];if(src.replace(re,'').trim())throw Error('Недопустимые символы в «'+s+'»: используйте цифры, латинские буквы и знаки + − * / ^ ( )');let i=0;
+  const pk=()=>T[i],nx=()=>T[i++],isF=t=>t&&/^[\dA-Za-zπ(]/.test(t),bad=()=>{throw Error('Не удалось разобрать выражение «'+s+'»')};
+  function at(){const t=nx();if(t=='('){const a=ex();if(nx()!=')')bad();return a}if(/^\d/.test(t))return pc(parseFloat(t.replace(',','.')));if(t&&/^[A-Za-zπ]$/.test(t))return pv(t);bad()}
+  function pw(){let a=at();if(pk()=='^'){nx();let g=1;if(pk()=='-'){nx();g=-1}const n=parseInt(nx());if(isNaN(n))bad();a=ppow(a,g*n)}return a}
+  function un(){if(pk()=='-'){nx();return pneg(un())}if(pk()=='+'){nx();return un()}return pw()}
+  function jx(){let a=un();while(isF(pk()))a=pmul(a,un());return a}
+  function tm(){let a=jx();while(pk()=='*'||pk()=='/'){const o=nx(),b=jx();a=o=='*'?pmul(a,b):pdiv(a,b)}return a}
+  function ex(){let a=tm();while(pk()=='+'||pk()=='-'){const o=nx(),b=tm();a=o=='+'?padd(a,b):padd(a,pneg(b))}return a}
+  const r=ex();if(i<T.length)bad();return r;
+}
+const sup=n=>String(n).replace(/\d/g,d=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[d]);
+function frac(x){for(let q=1;q<=64;q++){const p=Math.round(x*q);if(Math.abs(x-p/q)<1e-9)return[p,q]}return[x,1]}
+const rk=v=>{const i='πFPNMmqlLabAdEGI'.indexOf(v);return i<0?99:i};
+const vs=(e,g)=>Object.keys(e).sort((a,b)=>rk(a)-rk(b)||a.localeCompare(b)).filter(v=>g*e[v]>0).map(v=>v+(Math.abs(e[v])>1?sup(Math.abs(e[v])):'')).join('');
+const crossesZero=(a,b)=>(a<0&&b>0)||(a>0&&b<0);
+const fraction=(n,d)=>`<span class="frac"><span>${n}</span><span>${d}</span></span>`;
+const polynomialRatio=(a,b)=>Object.keys(b).length===1?ps(pdiv(a,b),true):fraction(ps(a),ps(b));
+function sectionFunction(coefficients,coordinate,sym,unit='',lengthUnit=''){
+  const coefficientUnit=i=>unit?' '+unit+(i&&lengthUnit?'/'+lengthUnit+(i===2?'²':''):''):'';
+
+  const powers=['',coordinate,coordinate+'²'];
+  const terms=coefficients.flatMap((coefficient,i)=>sym
+    ?Object.entries(coefficient).sort(([a],[b])=>a.localeCompare(b)).map(([key,t])=>({
+      negative:t.c<0,
+      text:(i&&key===''&&Math.abs(t.c)===1?'':ps({[key]:{...t,c:Math.abs(t.c)}}))+ (i&&!(key===''&&Math.abs(t.c)===1)?' · ':'')+powers[i]
+    }))
+    :f(coefficient)==='0'?[]:[{
+      negative:coefficient<0,
+      text:(i&&!unit&&Math.abs(coefficient)===1?'':f(Math.abs(coefficient))+coefficientUnit(i)+(i?' · ':''))+powers[i]
+    }]);
+  return terms.map((term,i)=>(term.negative?(i?' − ':'−'):(i?' + ':''))+term.text).join('')||'0'+coefficientUnit(0);
+}
+const monomialTexts=p=>Object.entries(p).map(([key,term])=>ps({[key]:term}));
+function equilibriumTerms(first,terms){
+  return terms.filter(term=>term!=='0').reduce((text,term)=>
+    text+(term.startsWith('−')?' − '+term.slice(1):' + '+term),first);
+}
+const momentAxis=axis=>axis==='x'?'z':'x';
+function effortMark(symbol,axis,node){
+  const direction=`<sub class="effort-sub">${axis}</sub>`;
+  return node?`${symbol}<sub class="effort-sub">${node}${direction}</sub>`:symbol+direction;
+}
+const svgEffortMark=(symbol,axis)=>`${symbol}<tspan baseline-shift="sub" font-size="80%">${axis}</tspan>`;
+function clampReactionLabel(x,viewWidth,left,y,text){
+  const boxX=left?2:x+7;
+  const width=left?x-9:viewWidth-boxX-2;
+  return `<foreignObject x="${boxX}" y="${y}" width="${width}" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="plot-label" style="white-space:normal;overflow-wrap:anywhere;text-align:${left?'right':'left'};color:var(--orange)">${text}</div></foreignObject>`;
+}
+function cutEquilibrium(sumName,internal,external){
+  const sign=external.startsWith('−')?' − ':' + ';
+  const terms=/^0(?: .+)?$/.test(external)?'':sign+external.replace(/^−/,'');
+  return sumName+' = 0 → '+internal+terms+' = 0<br>';
+}
+function sectionTable(coordinate,length,headers,first,last){
+  return `<div class="sc"><table>
+    <thead><tr><th scope="col">Координата</th>${headers.map(h=>`<th scope="col">${h}</th>`).join('')}</tr></thead>
+    <tbody>${[first,last].map((values,i)=>`<tr><th scope="row">${coordinate} = ${i?length:'0'}</th>${values.map(value=>`<td>${value}</td>`).join('')}</tr>`).join('')}</tbody>
+  </table></div>`;
+}
+function extremumText(kind,effort,coordinate,root,valueName,value,sym){
+  return `<br><b>Локальный ${kind}:</b> ${effort} = 0 → ${coordinate}* = ${root}<br>${valueName}(${coordinate}*) = ${value}${sym?' <span class="n">(переход через ноль при заданных подстановках)</span>':''}`;
+}
+function ps(p,wrap,stacked=true){
+  const ts=Object.keys(p).sort().map(k=>p[k]);if(!ts.length)return'0';
+  let o=ts.map((t,i)=>{const[a,q]=frac(Math.abs(t.c)),n=vs(t.e,1),d=vs(t.e,-1);
+    const num=n?(a==1?n:String(a).replace('.',',')+n):String(a).replace('.',','),den=(q>1?q:'')+d;
+    const body=den?(stacked?fraction(num,den):num+'/'+(den.length>1?'('+den+')':den)):num;
+    return(t.c<0?(i?' − ':'−'):(i?' + ':''))+body}).join('');
+  return wrap&&ts.length>1?'('+o+')':o;
+}
+const startLoadKeys=['startH','startV','startM'];
+const startLoadValue=key=>String($('#'+key).value??'').trim()||'0';
+const startLoadFields=task=>task==='frame'?startLoadKeys:task==='bend'?startLoadKeys.slice(1):[];
+function setStartLoads(values={}){
+  for(const key of startLoadKeys)$('#'+key).value=values[key]??'0';
+}
+function readStartLoad(key,sym){
+  return readAt('#'+key,()=>sym?parse(startLoadValue(key)):pc(finiteInput(startLoadValue(key))));
+}
+startLoadKeys.forEach(key=>$('#'+key).oninput=calc);
+function generateExercise(){
+  setStartLoads();
+  if(isFrame()){generateFrame();return}
+  const task=$('#task').value, sym=$('#mode').value==='sym';
+  const torsion=task==='tor', bending=task==='bend';
+  const randomInt=(min,max)=>min+Math.floor(Math.random()*(max-min+1));
+  const symbolic=(factor,base)=>(factor===1?'':factor)+base;
+  const zero=sym?'0':0;
+  const nonzeroLoad=(max,base,conversion)=>sym
+    ?symbolic(randomInt(1,5),base)
+    :Number((randomInt(1,max)*conversion).toPrecision(12));
+  const load=(max,base,conversion)=>Math.random()<.5?zero:nonzeroLoad(max,base,conversion);
+  const lengthUnit=U.L[$('#uL').value];
+  const loadUnit=U.F[$('#uF').value];
+  const areaUnit=U.A[$('#uA').value];
+  const momentUnit=UK.tor.F[$('#beamMomentUnit').value];
+  const distributedScale=(torsion?1:1000)*lengthUnit/loadUnit;
+  const count=randomInt(2,5);
+  rows=Array.from({length:count},()=>{
+    const length=randomInt(1,4);
+    const row={
+      L:sym?symbolic(length,'l'):length/lengthUnit,
+      q:load(20,torsion?'m':'q',distributedScale),
+      F:torsion?load(30,'ml',1000/loadUnit):load(50,'ql',1000/loadUnit)
+    };
+    if(bending)row.M=load(30,'ql²',1000/momentUnit);
+    else if(torsion)row.A=sym?symbolic(randomInt(1,4),'d'):Number((randomInt(5,8)*.01/areaUnit).toPrecision(12));
+    else row.A=sym?symbolic(randomInt(1,4),'A'):Number((randomInt(5,20)*.0001/areaUnit).toPrecision(12));
+    return row;
+  });
+  const pins=bending&&randomInt(0,1)===1;
+  if(bending)$('#beamType').value=pins?'pins':'fixed';
+  if(pins){
+    beamNodes();
+    const fixedPin=randomInt(0,count);
+    // Sample from all nodes except the fixed pin.
+    const other=randomInt(0,count-1);
+    $('#pinA').value=String(fixedPin);
+    $('#pinB').value=String(other>=fixedPin?other+1:other);
+    for(const node of [Number($('#pinA').value),Number($('#pinB').value)]){
+      if(node>0)rows[node-1].F=zero;
+    }
+  }else{
+    const right=randomInt(0,1)===1;
+    $('#support').value=right?'right':'left';
+    // In bending, the last row carries concentrated loads at the right end.
+    if(bending&&right)rows[count-1].F=rows[count-1].M=zero;
+  }
+  if(!rows.some(row=>[row.q,row.F,row.M].some(value=>value!==undefined&&value!==zero))){
+    rows[randomInt(0,count-1)].q=nonzeroLoad(20,torsion?'m':'q',distributedScale);
+  }
+  build();
+  calc();
+}
+function setRows(){setStartLoads();const sy=$('#mode').value=='sym',t=$('#task').value;rows=PRE[t][sy?'sym':'num'].map(r=>({...r}));
+  $('#E').type=sy?'text':'number';$('#E').value=sy?TX[t].mod:TX[t].e;build();calc()}
+$('#mode').onchange=setRows;
+$('#task').onchange=()=>{setTask();setRows()};
+$('#tiles').onclick=e=>{const b=e.target.closest('.tile');if(!b)return;$('#task').value=b.dataset.t;$('#task').onchange()};
+
+function loadUnitLabel(text){
+  $('#qu').textContent=text;
+  document.querySelectorAll('.mobile-q-unit').forEach(label=>label.textContent=text?'('+text+')':'');
+}
+const diagramScroll=svg=>`<div class="diagram-scroll" tabindex="0" aria-label="Схема или эпюра">${svg}</div>`;
+let printFunctions=[];
+function printSettings(){
+  const labels=document.querySelectorAll('.config-row>label, #beamSupports>label, #frameSupports>label, .unit-row>label, #startLoads>label');
+  const settings=Array.from(labels).filter(label=>!label.closest('[hidden]')).map(label=>{
+    const field=label.querySelector('select');
+    const name=label.firstChild.nodeType===3?label.firstChild.textContent:label.firstElementChild.textContent;
+    const value=(label.querySelector('input')?.value||'')+(label.querySelector('input')?' ':'')+
+      (field?.selectedOptions[0]?.textContent||'');
+    const title=label.closest('#startLoads')?'Начальный узел · '+name.trim():name.trim();
+    return `<tr><th scope="row">${esc(title)}</th><td>${esc(value)}</td></tr>`;
+  }).join('');
+  const inputs=$('#tb').closest('table').cloneNode(true);
+  inputs.querySelectorAll('.noprint,[hidden],.mobile-field').forEach(node=>node.remove());
+  inputs.querySelectorAll('input,select').forEach(input=>input.parentElement.replaceWith(document.createTextNode(input.selectedOptions?.[0]?.textContent??input.value)));
+  inputs.querySelectorAll('[id]').forEach(node=>node.removeAttribute('id'));
+  return `<h2>Параметры расчёта</h2><table class="print-settings">${settings}</table><h2>Исходные данные</h2>${inputs.outerHTML}`;
+}
+function preparePrintReport(){
+  const report=$('#printReport');
+  if($('#out').hidden||$('#solutionCard').hidden||report.innerHTML)return;
+  const drawings=Array.from($('#svgs').querySelectorAll('.diagram-scroll'),node=>node.outerHTML);
+  const solution=$('#sol');
+  const reactions=solution.firstElementChild.outerHTML;
+  const sections=[];
+  let current;
+  let conclusion='';
+  for(const item of solution.children){
+    if(item.matches('h4')){
+      current=[];
+      sections.push(current);
+    }
+    if(item.matches('p')&&item.textContent.trim().startsWith('Итог:'))conclusion=item.outerHTML;
+    else if(current)current.push(item.outerHTML);
+  }
+  const heading=esc($('#h1').textContent);
+  const page=(body,kind='')=>`<section class="print-page ${kind}">${body}</section>`;
+  let pages=page(`<h1>${heading}</h1>${printSettings()}<h2>Схема с реакциями</h2>${drawings[0]}`);
+  const frameReport=isFrame(),expandedFrame=frameReport&&sections.length>=3;
+  const summary=`<h2>Определение реакций</h2>${reactions}
+    <h2>Функции по участкам</h2><div class="print-functions">${printFunctions.join('')}</div>`;
+  if(expandedFrame){
+    pages+=page(`<h2>Схема и эпюры</h2><div class="print-diagrams-grid">${drawings.join('')}</div>`);
+    pages+=page(summary);
+  }else pages+=page(`<h2>Схема и эпюры</h2>${drawings.join('')}${summary}`,'print-overview');
+
+  const seedLine=`<p class="print-seed"><b>Seed схемы</b><br><code>${esc(currentSeed)}</code></p>`;
+  const perPage=expandedFrame?1:2;
+  for(let i=0;i<sections.length;i+=perPage){
+    const detail=sections.slice(i,i+perPage).map(items=>`<div class="print-detail">${items.join('')}</div>`).join('');
+    const ending=i+perPage>=sections.length?conclusion+(frameReport?'':seedLine):'';
+    pages+=page(`<h2>Подробный расчёт эпюр</h2>${detail}${ending}`,expandedFrame?'print-frame-member':'');
+  }
+  if(frameReport)pages+=page(seedLine);
+  let index=0;
+  report.innerHTML=pages.replace(/<svg[\s\S]*?<\/svg>/g,svg=>{
+    const prefix='print'+index+++'-';
+    return svg.replace(/\bid="([^"]+)"/g,(_,id)=>'id="'+prefix+id+'"').replace(/url\(#([^)]*)\)/g,(_,id)=>'url(#'+prefix+id+')');
+  });
+  const title=document.title;
+  document.title='';
+  window.addEventListener('afterprint',()=>{
+    document.title=title;
+    report.innerHTML='';
+  },{once:true});
+}
+function printCalculator(){
+  if($('#out').hidden||$('#solutionCard').hidden)return;
+  preparePrintReport();
+  window.print();
+}
+window.addEventListener('beforeprint',preparePrintReport);
+const seedOptions={
+  mode:['num','sym'],axis:['x','z'],solveBy:['internal','external'],
+  dir:['ltr','rtl'],support:['left','right']
+};
+const seedTasks=['ax','tor','bend','frame'];
+const seedUnitKeys=['L','F','A','E'];
+const seedSupportTypes=['fixed','pins','rollers','none'];
+const seedRollDirections=['h','y'];
+const seedMomentUnits=['кН·м','Н·м','Н·мм'];
+const seedFrameDirections=['right','left','up','down'];
+let currentSeed='';
+const seedRowKeys=task=>task==='frame'?['P','D','L','q','H','V','M']:task==='bend'?['L','q','F','M']:['L','A','q','F'];
+// SC2 stores selections by index and common integer inputs in a single byte.
+function encodeSeed(state){
+  const {task,settings,units,rows,beam,frame,start}=state;
+  const bytes=[seedTasks.indexOf(task)];
+  const encoder=new TextEncoder();
+  const choice=(choices,value)=>bytes.push(choices.indexOf(value)&255);
+  const value=text=>{
+    const n=Number(text);
+    if(Number.isInteger(n)&&Math.abs(n)<=127&&String(n)===text){
+      bytes.push(n<0?-2*n-1:2*n);
+      return;
+    }
+    const encoded=encoder.encode(text);
+    bytes.push(255);
+    let length=encoded.length;
+    while(length>=128){
+      bytes.push(length%128+128);
+      length=Math.floor(length/128);
+    }
+    bytes.push(length);
+    for(const byte of encoded)bytes.push(byte);
+  };
+  const flags=Object.entries(seedOptions).reduce((bits,[key,choices],i)=>bits|(choices.indexOf(settings[key])===1?1<<i:0),0);
+  bytes.push(flags);
+  for(const key of seedUnitKeys)choice(Object.keys(UK[task][key]),units[key]);
+  if(task==='bend'){
+    choice(seedSupportTypes,beam.type);
+    choice(seedMomentUnits,beam.momentUnit);
+    bytes.push(...beam.pins);
+  }else if(task==='frame'){
+    choice(seedSupportTypes,frame.frameType);
+    choice(seedRollDirections,frame.frameRoll);
+    choice(seedMomentUnits,frame.beamMomentUnit);
+    for(const key of ['frameA','frameB','frameC'])bytes.push(Number(frame[key]));
+  }else value(state.modulus);
+  bytes.push(rows.length);
+  for(const row of rows){
+    row.forEach((text,i)=>{
+      if(task==='frame'&&i===1)choice(seedFrameDirections,text);
+      else value(text);
+    });
+  }
+  if(start)for(const key of startLoadFields(task))value(start[key]??'0');
+  const binary=bytes.map(byte=>String.fromCharCode(byte)).join('');
+  return 'SC2-'+btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function decodeSeed(seed){
+  const binary=atob(seed.slice(4).replace(/-/g,'+').replace(/_/g,'/'));
+  const bytes=Uint8Array.from(binary,char=>char.charCodeAt(0));
+  const decoder=new TextDecoder('utf-8',{fatal:true});
+  if(seed.startsWith('SC1-'))return JSON.parse(decoder.decode(bytes));
+  let offset=0;
+  const byte=()=>{
+    if(offset>=bytes.length)throw Error('Unexpected end of seed');
+    return bytes[offset++];
+  };
+  const value=()=>{
+    const code=byte();
+    if(code!==255)return String(code%2?-(code+1)/2:code/2);
+    let length=0,multiplier=1,part;
+    do{
+      part=byte();
+      length+=(part%128)*multiplier;
+      multiplier*=128;
+      if(length>bytes.length-offset)throw Error('Invalid seed field length');
+    }while(part>=128);
+    const text=decoder.decode(bytes.subarray(offset,offset+length));
+    offset+=length;
+    return text;
+  };
+  const task=seedTasks[byte()],flags=byte();
+  if(!task||flags>=32)throw Error('Invalid seed settings');
+  const settings=Object.fromEntries(Object.entries(seedOptions).map(([key,choices],i)=>[key,choices[(flags>>i)&1]]));
+  const units=Object.fromEntries(seedUnitKeys.map(key=>[key,Object.keys(UK[task][key])[byte()]]));
+  const state={task,settings,units};
+  if(task==='bend'){
+    state.beam={type:seedSupportTypes[byte()],momentUnit:seedMomentUnits[byte()],pins:[byte(),byte()]};
+  }else if(task==='frame'){
+    state.frame={frameType:seedSupportTypes[byte()],frameRoll:seedRollDirections[byte()],beamMomentUnit:seedMomentUnits[byte()],
+      frameA:String(byte()),frameB:String(byte()),frameC:String(byte())};
+  }else state.modulus=value();
+  const count=byte();
+  if(count<1||count>10)throw Error('Invalid seed row count');
+  state.rows=Array.from({length:count},()=>seedRowKeys(task).map((_,i)=>task==='frame'&&i===1?seedFrameDirections[byte()]:value()));
+  if(offset<bytes.length)state.start=Object.fromEntries(startLoadFields(task).map(key=>[key,value()]));
+  if(offset!==bytes.length)throw Error('Unexpected seed data');
+  return state;
+}
+function updateSeed(){
+  const task=$('#task').value;
+  const state={task,settings:{},units:{},rows:[]};
+  for(const key of Object.keys(seedOptions))state.settings[key]=$('#'+key).value;
+  for(const key of ['L','F','A','E'])state.units[key]=$('#u'+key).value;
+  if(task==='bend'){
+    state.beam={type:$('#beamType').value,momentUnit:$('#beamMomentUnit').value,
+      pins:[$('#pinA').value,$('#pinB').value].map(Number)};
+  }else if(task==='frame')state.frame=Object.fromEntries(frameControls.map(key=>[key,$('#'+key).value]));
+  else state.modulus=$('#E').value;
+  const keys=seedRowKeys(task);
+  state.rows=rows.map(row=>keys.map(key=>String(row[key]??'')));
+  const start=Object.fromEntries(startLoadFields(task).map(key=>[key,startLoadValue(key)]));
+  if(Object.values(start).some(value=>value!=='0'))state.start=start;
+  currentSeed=encodeSeed(state);
+  $('#seedCopy').textContent=currentSeed;
+}
+function restoreSeed(seed){
+  const invalid=()=>Error('Seed не распознан. Скопируйте код схемы целиком.');
+  if(!/^SC[12]-[A-Za-z0-9_-]+$/.test(seed))throw invalid();
+  let state;
+  try{state=decodeSeed(seed)}catch{throw invalid()}
+  if(!state||!['ax','tor','bend','frame'].includes(state.task))throw invalid();
+  const {task,settings,units,modulus,beam}=state;
+  const keys=seedRowKeys(task);
+  if(!Array.isArray(state.rows)||state.rows.length<1||state.rows.length>10||
+    state.rows.some(row=>!Array.isArray(row)||row.length!==keys.length||row.some(value=>typeof value!=='string')))throw invalid();
+  if(!settings||!units||Object.entries(seedOptions).some(([key,choices])=>!choices.includes(settings[key]))||
+    ['L','F','A','E'].some(key=>!Object.keys(UK[task][key]).includes(units[key])))throw invalid();
+  if(task==='bend'){
+    if(!beam||!['fixed','pins'].includes(beam.type)||!['кН·м','Н·м','Н·мм'].includes(beam.momentUnit)||
+      !Array.isArray(beam.pins)||beam.pins.length!==2||
+      beam.pins.some(pin=>!Number.isInteger(pin)||pin<0||pin>state.rows.length))throw invalid();
+  }else if(task==='frame'){
+    if(!state.frame||!['fixed','pins','rollers','none'].includes(state.frame.frameType)||
+      !['h','y'].includes(state.frame.frameRoll)||!Object.keys(UK.tor.F).includes(state.frame.beamMomentUnit)||
+      ['frameA','frameB','frameC'].some(key=>!/^\d+$/.test(state.frame[key])||Number(state.frame[key])>state.rows.length)||
+      state.rows.some((row,i)=>!/^\d+$/.test(row[0])||Number(row[0])>i||!Object.keys(frameDirections).includes(row[1])))throw invalid();
+  }else if(typeof modulus!=='string')throw invalid();
+
+  if(state.start!==undefined&&(!state.start||typeof state.start!=='object'||Array.isArray(state.start)||
+    Object.entries(state.start).some(([key,value])=>!startLoadFields(task).includes(key)||typeof value!=='string')))throw invalid();
+  setStartLoads(state.start);
+  $('#task').value=task;
+  setTask();
+  for(const key of Object.keys(seedOptions))$('#'+key).value=settings[key];
+  for(const key of ['L','F','A','E'])$('#u'+key).value=units[key];
+  rows=state.rows.map(values=>Object.fromEntries(keys.map((key,i)=>[key,values[i]])));
+  $('#E').type=settings.mode==='sym'?'text':'number';
+  if(task==='bend'){
+    $('#beamType').value=beam.type;
+    $('#beamMomentUnit').value=beam.momentUnit;
+    beamNodes();
+    $('#pinA').value=String(beam.pins[0]);
+    $('#pinB').value=String(beam.pins[1]);
+  }else if(task==='frame'){
+    frameNodes();
+    for(const key of frameControls)$('#'+key).value=state.frame[key];
+  }else $('#E').value=modulus;
+  build();
+  calc();
+}
+function showSeedForm(show){
+  $('#seedForm').hidden=!show;
+  $('#seedOpen').setAttribute('aria-expanded',String(show));
+  if(show)$('#seedInput').focus();
+}
+$('#seedOpen').onclick=()=>showSeedForm($('#seedForm').hidden);
+$('#seedForm').onsubmit=event=>{
+  event.preventDefault();
+  try{
+    restoreSeed($('#seedInput').value.trim());
+    $('#seedInput').value='';
+    showSeedForm(false);
+    $('#seedStatus').textContent='Схема восстановлена.';
+  }catch(error){$('#seedStatus').textContent=error.message}
+};
+$('#seedCopy').onclick=async()=>{
+  const seed=currentSeed;
+  try{
+    await navigator.clipboard.writeText(seed);
+  }catch{
+    showSeedForm(true);
+    $('#seedInput').value=seed;
+    $('#seedInput').select();
+    if(!document.execCommand?.('copy')){
+      $('#seedStatus').textContent='Seed выделен. Скопируйте его вручную.';
+      return;
+    }
+    $('#seedInput').value='';
+    showSeedForm(false);
+  }
+  $('#seedStatus').textContent='Seed скопирован.';
+};
+const rowField=(index,key)=>`#tb [data-i="${index}"][data-k="${key}"]`;
+function validationError(message,...fields){
+  fields.forEach(selector=>document.querySelectorAll(selector).forEach(field=>{
+    field.setAttribute('aria-invalid','true');
+    field.setAttribute('aria-describedby','err');
+  }));
+  return Error(message);
+}
+function readAt(field,read){
+  try{return read()}
+  catch(error){throw validationError(error.message,field)}
+}
+function finiteInput(value){
+  const raw=String(value).trim().replace(',','.').replace('−','-');
+  if(!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i.test(raw)||!Number.isFinite(Number(raw))){
+    throw Error('Введите конечное число. Для отсутствующей нагрузки укажите 0.');
+  }
+  return Number(raw);
+}
+function calc(){
+  document.querySelectorAll('[aria-invalid="true"]').forEach(field=>{
+    field.removeAttribute('aria-invalid');
+    field.removeAttribute('aria-describedby');
+  });
+  renderCalculation();
+  if(!$('#err').hidden){
+    $('#schemeCard').setAttribute('aria-invalid','true');
+    if($('#out').hidden)$('#svgs').innerHTML='';
+  }
+  updateSeed();
+}
+function renderCalculation(){
+  printFunctions=[];
+  $('#solutionCard').hidden=false;
+  const beam=isBeam(),frame=isFrame();
+  $('#frameSupports').hidden=!frame;
+  $('#startLoads').hidden=!beam&&!frame;
+  $('#startHLabel').hidden=!frame;
+  if(beam||frame){
+    const sym=$('#mode').value==='sym';
+    const forceUnit=sym?'':', '+$('#uF').value;
+    const momentUnit=sym?'':', '+$('#beamMomentUnit').value;
+    $('#startLoadsTitle').textContent='Нагрузки в начале первого '+(frame?'стержня (узел A)':'участка (узел '+nodeLetter(0,rows.length)+')');
+    $('#startHName').textContent='Горизонтальная сила'+forceUnit;
+    $('#startVName').textContent='Вертикальная сила'+forceUnit;
+    $('#startMName').textContent='Сосредоточенный момент'+momentUnit;
+  }
+  $('#axisLabel').textContent=frame?'Горизонтальная ось':'Продольная ось';
+  $('#dir option[value="ltr"]').textContent=frame?'Слева направо / снизу вверх':'Слева направо';
+  $('#dir option[value="rtl"]').textContent=frame?'Справа налево / сверху вниз':'Справа налево';
+  if(frame){calcFrame();return}
+  $('#beamTypeLabel').hidden=!beam;
+  $('#beamSupports').hidden=true;
+  $('#constructorTitle').textContent=beam?'Конструктор: участки балки слева направо':'Конструктор: участки от заделки к свободному концу';
+  $('#loadLocation').textContent=beam?'на правом конце участка':'на конце со стороны свободного конца';
+  if(beam){calcBeam();return}
+  $('#supportLabel').hidden=false;
+  $('#beamMomentUnitLabel').hidden=true;
+
+  const sym=$('#mode').value=='sym',un=k=>$('#u'+k).value,one=k=>sym?1:U[k][un(k)];
+  const flip=mirrored()?-1:1, axisDir=analysisFromLeft()?1:-1;
+  const TQ=$('#task').value=='tor',KT=TQ?{N:'Mк',s:'τ',e:'γ',dk:1,dh:'рад'}:{N:'N',s:'σ',e:'ε',dk:1e3,dh:'мм'};
+  ['L','F','A','E'].forEach(k=>$('#u'+k).disabled=sym);
+  $('#forceUnitsLabel').hidden=sym;$('#areaUnitsLabel').hidden=sym;$('#modulusLabel').hidden=sym;
+  const lu=one('L'),fu=one('F'),au=one('A');
+  loadUnitLabel(sym?'':un('F')+'/'+un('L'));
+  let R,E,PR,Ep,SY;
+  try{
+    if(sym){
+      PR=rows.map((r,i)=>Object.fromEntries(['L','A','q','F'].map(k=>[k,readAt(rowField(i,k),()=>parse(r[k]))])));
+      Ep=readAt('#E',()=>parse($('#E').value));
+      if(Object.keys(Ep).length!==1)throw validationError('Модуль должен быть положительным одночленом.','#E');
+      PR.forEach((r,i)=>{if(Object.keys(r.A).length!==1)throw validationError('Площадь или диаметр должны быть положительным одночленом.',rowField(i,'A'))});
+
+      PR.forEach(r=>{if(TQ){r.W=pmul(pc(1/16),pmul(pv('π'),ppow(r.A,3)));r.I=pmul(pc(1/32),pmul(pv('π'),ppow(r.A,4)))}else{r.W=r.I=r.A}});
+      const nmAll=[...new Set([Ep,...PR.flatMap(r=>[r.L,r.A,r.q,r.F])].flatMap(p=>Object.values(p).flatMap(t=>Object.keys(t.e))))].sort();
+      const v=Object.fromEntries(nmAll.map(n=>[n,n==='π'?Math.PI:1]));
+      R=PR.map(r=>({L:peval(r.L,v),A:peval(r.A,v),q:peval(r.q,v),F:peval(r.F,v)}));E=peval(Ep,v);
+    }else{
+      R=rows.map((r,i)=>Object.fromEntries(['L','A','q','F'].map(k=>[k,readAt(rowField(i,k),()=>finiteInput(r[k]))])));
+      E=readAt('#E',()=>finiteInput($('#E').value))*U.E[un('E')];
+    }
+    if(!Number.isFinite(E)||E<=0)throw validationError('Модуль должен быть положительным и конечным.','#E');
+    R.forEach((r,i)=>{
+      for(const key of ['L','A','q','F']){
+        if(!Number.isFinite(r[key])||((key==='L'||key==='A')&&r[key]<=0)){
+          throw validationError('Проверьте длину, сечение и нагрузки участка '+(i+1)+'.',rowField(i,key));
+        }
+      }
+    });
+    if(sym){
+      let acc={},u={};SY=PR.map(()=>({}));
+      for(let i=PR.length-1;i>=0;i--){const r=PR[i];acc=padd(acc,padd(r.F,pmul(r.q,r.L)));SY[i].N0=acc;SY[i].N1=padd(acc,pneg(pmul(r.q,r.L)))}
+      PR.forEach((r,i)=>{const y=SY[i];y.s0=pdiv(y.N0,r.W);y.s1=pdiv(y.N1,r.W);y.e0=pdiv(y.s0,Ep);y.e1=pdiv(y.s1,Ep);
+        y.d=pdiv(padd(pmul(y.N0,r.L),pneg(psc(pmul(r.q,pmul(r.L,r.L)),.5))),pmul(Ep,r.I));y.u0=u;u=padd(u,y.d);y.u1=u});
+    }
+  }catch(e){$('#out').hidden=true;$('#err').hidden=false;$('#err').textContent=e.message;return}
+  $('#out').hidden=false;$('#err').hidden=true;
+  const S=R.map(r=>{const a=r.A*au;return{L:r.L*lu,A:a,W:TQ?Math.PI*a**3/16:a,I:TQ?Math.PI*a**4/32:a,q:r.q*fu/lu,F:r.F*fu}});
+  let acc=0;
+  for(let i=S.length-1;i>=0;i--){const s=S[i];acc+=s.F+s.q*s.L;s.N0=acc;s.N1=acc-s.q*s.L}
+  let u=0,c=0;
+  S.forEach(s=>{s.c=c;c+=s.L;s.u0=u;s.d=(s.N0*s.L-s.q*s.L*s.L/2)/(E*s.I);u+=s.d;s.u1=u});
+  const tot=c,Nf=v=>v/fu,sg=(N,s)=>N/s.W/1e6;
+  const axis=$('#axis').value,solveBy=$('#solveBy').value;
+  const ord=S.map((s,i)=>i);if(!fromSupport())ord.reverse();const num=i=>ord.indexOf(i)+1;
+  const diagramColor=solveBy==='internal'?'var(--a)':'var(--red)';
+  const Fn=(s,t)=>Nf(s.N0-s.q*s.L*t),Sg=(s,t)=>sg(s.N0-s.q*s.L*t,s),Un=(s,t)=>(s.u0+(s.N0*s.L*t-s.q*(s.L*t)**2/2)/(E*s.I))*KT.dk;
+  const T=S.map((s,i)=>{const a=sg(s.N0,s),b=sg(s.N1,s),y=SY&&SY[i];
+    return sym?{N0:ps(y.N0),N1:ps(y.N1),s0:ps(y.s0),s1:ps(y.s1),e0:ps(y.e0),e1:ps(y.e1),d:ps(y.d),u0:ps(y.u0),u:ps(y.u1)}
+    :{N0:f(Nf(s.N0)),N1:f(Nf(s.N1)),s0:f(a),s1:f(b),e0:f(a*1e12/E),e1:f(b*1e12/E),d:f(s.d*KT.dk),u0:'',u:f(s.u1*KT.dk)}});
+  const lb=(i,k)=>sym?esc(String(rows[i][k]).trim()):f(R[i][k]);
+  const loadMagnitude=(i,key)=>sym?ps(R[i][key]<0?pneg(PR[i][key]):PR[i][key],false,false):f(Math.abs(R[i][key]));
+  // схема
+  const W=640,x0=80,X=v=>x0+(flip===1?v/tot:1-v/tot)*W,Am=Math.max(...S.map(s=>s.A)),hs=i=>16+40*S[i].A/Am;
+  const reaction=-(S.reduce((sum,s)=>sum+s.F+s.q*s.L,0));
+  const forceUnit=sym?'':` ${un('F')}`, loadUnit=sym?'':` ${un('F')}/${un('L')}`;
+  const supportX=X(0);
+  const nodeName=i=>nodeLetter(flip>0?i:S.length-i,S.length);
+  const reactionName=effortMark(TQ?'M':'R',axis,nodeName(0));
+  const externalMark=svgEffortMark(TQ?'M':'F',axis);
+  const Rr=sym?ps(pneg(SY[0].N0)):f(-Nf(S[0].N0));
+  let sc=`<svg viewBox="0 0 820 207"><line x1="${supportX}" y1="10" x2="${supportX}" y2="140" stroke="var(--axis-ink)" stroke-width="2"/>`;
+  for(let y=14;y<140;y+=10)sc+=`<line x1="${supportX}" y1="${y}" x2="${supportX-flip*12}" y2="${y+8}" stroke="var(--axis-ink)"/>`;
+  S.forEach((s,i)=>{
+    const h=16+40*s.A/Am,xa=X(s.c),xb=X(s.c+s.L);
+    sc+=`<rect x="${Math.min(xa,xb)}" y="${85-h/2}" width="${Math.abs(xb-xa)}" height="${h}" fill="var(--c)" stroke="var(--ink)"/><text x="${(xa+xb)/2}" y="${TQ?85:85+h/2+14}" text-anchor="middle" font-size="12" dy="${TQ?4:0}">${num(i)}</text>`;
+    sc+=`<text x="${(xa+xb)/2}" y="143" text-anchor="middle" font-size="11" fill="var(--m)">${sym?'':'L = '}${lb(i,'L')}${sym?'':' '+un('L')}</text>
+      <text x="${(xa+xb)/2}" y="${85-h/2-23}" text-anchor="middle" font-size="11" fill="var(--m)">${sym?'':(TQ?'d':'A')+' = '}${lb(i,'A')}${sym?'':' '+un('A')}</text>`;
+  });
+  [0,...S.map(s=>s.c+s.L)].forEach((v,i)=>{
+    sc+=`<text x="${X(v)-4}" y="${85+Math.max(hs(Math.max(0,i-1)),hs(Math.min(i,S.length-1)))/2+11}" text-anchor="end" font-size="11" font-weight="600">${nodeName(i)}</text>`;
+  });
+  sc+=`<line x1="${axisDir>0?x0:x0+W}" y1="85" x2="${axisDir>0?x0+W+58:x0-66}" y2="85" stroke="var(--muted-ink)" stroke-width="0.8" marker-end="url(#axisArrow)"/><text x="${axisDir>0?x0+W+74:x0-74}" y="89" font-size="12" font-style="italic" fill="var(--secondary-ink)">${axis}</text>`;
+  // Внешние нагрузки рисуются после стержня, горизонтально и на переднем плане.
+  S.forEach((s,i)=>{
+    const xa=X(s.c),xb=X(s.c+s.L);
+    if(Math.abs(s.q)>1e-12){const d=flip*Math.sign(s.q);for(let xx=Math.min(xa,xb)+8;xx<Math.max(xa,xb)-5;xx+=18)sc+=TQ?arc(xx+4,85,d,'var(--green)','ar',hs(i)/2+7,4):`<line x1="${xx}" y1="85" x2="${xx+d*13}" y2="85" stroke="var(--green)" stroke-width="1.8" marker-end="url(#ar)"/>`;sc+=`<text x="${(xa+xb)/2}" y="${TQ?42:85-hs(i)/2-8}" text-anchor="middle" font-size="11" fill="var(--green)">${loadMagnitude(i,'q')}${loadUnit}</text>`;}
+    if(TQ&&Math.abs(s.F)>1e-12){const d=flip*Math.sign(s.F),hh=Math.max(hs(i),i+1<S.length?hs(i+1):0);sc+=arc(xb,85,d,'var(--red)','ar2',hh/2+11,8)+`<text x="${xb}" y="${85-hh/2-24}" text-anchor="middle" font-size="12" font-weight="600" fill="var(--red)">${d>0?'↺':'↻'} ${externalMark} = ${loadMagnitude(i,'F')}${forceUnit}</text>`}
+    if(!TQ&&Math.abs(s.F)>1e-12){const d=flip*Math.sign(s.F);sc+=`<line x1="${xb}" y1="85" x2="${xb+d*40}" y2="85" stroke="var(--red)" stroke-width="2.8" marker-end="url(#ar2)"/><text x="${xb+d*20}" y="76" text-anchor="middle" font-size="12" font-weight="600" fill="var(--red)">${externalMark} = ${loadMagnitude(i,'F')}${forceUnit}</text>`;}
+  });
+  const rd=flip*Math.sign(reaction);
+  if(rd&&TQ)sc+=arc(supportX+flip*16,85,rd,'var(--orange)','arR',hs(0)/2+11,8);
+  else if(rd)sc+=`<line x1="${supportX}" y1="85" x2="${supportX+rd*48}" y2="85" stroke="var(--orange)" stroke-width="3" marker-end="url(#arR)"/>`;
+  const reactionMagnitude=sym?ps(reaction<0?SY[0].N0:pneg(SY[0].N0)):f(Math.abs(reaction/fu));
+  sc+=clampReactionLabel(supportX,820,flip>0,TQ?19:48,reactionName+' = '+reactionMagnitude+forceUnit);
+  sc+=`<defs>${MK('axisArrow','var(--muted-ink)')+MK('arR','var(--orange)')+MK('ar','var(--green)')+MK('ar2','var(--red)')}</defs></svg>`;
+  // эпюры; sl(i,0|1) — подпись в буквенном режиме
+  const peaks=S.map((s,i)=>{
+    if(!crossesZero(s.N0,s.N1))return null;
+      const x=s.N0/s.q, t=x/s.L;
+      let root, value;
+      if(sym){
+        const y=SY[i], section=PR[i];
+        root=polynomialRatio(y.N0,section.q);
+        const denominator=psc(pmul(section.q,pmul(Ep,section.I)),2);
+        const numerator=padd(pmul(y.u0,denominator),ppow(y.N0,2));
+        value=polynomialRatio(numerator,denominator);
+      }else{
+        root=fraction(f(Nf(s.N0)),f(s.q*lu/fu))+' = '+f(x/lu)+' '+un('L');
+        value=f(Un(s,t));
+      }
+    return {t,root,value};
+  });
+  const plot=(title,fn,sl,sgn,extrema)=>{
+    let m=0;
+    S.forEach((s,i)=>{
+      for(let k=0;k<=20;k++)m=Math.max(m,Math.abs(fn(s,k/20)));
+      if(extrema?.[i])m=Math.max(m,Math.abs(fn(s,extrema[i].t)));
+    });
+    if(!m)m=1;
+    const H=62,y0=H+34,Y=v=>y0-v/m*H;
+    let o=`<text x="4" y="16" font-size="13" font-weight="600">${title}</text><line x1="${x0-10}" y1="${y0}" x2="${x0+W+30}" y2="${y0}" stroke="var(--axis-ink)"/>`;
+    o+=`<line x1="${X(0)}" y1="26" x2="${X(0)}" y2="${2*H+42}" stroke="var(--guide)" stroke-dasharray="3 3"/>`;
+    const labels=[], occupied=[];
+    let pe='';S.forEach((s,i)=>{
+      const xa=X(s.c),xb=X(s.c+s.L);let p=`${xa},${y0} `;
+      const peak=extrema&&extrema[i];
+      const points=Array.from({length:21},(_,k)=>k/20);
+      if(peak)points.push(peak.t);
+      for(const t of points.sort((a,b)=>a-b)){p+=`${xa+(xb-xa)*t},${Y(fn(s,t))} `}
+      o+=`<line x1="${xb}" y1="26" x2="${xb}" y2="${2*H+42}" stroke="var(--guide)" stroke-dasharray="3 3"/><polygon points="${p}${xb},${y0}" fill="${solveBy==='internal'?'rgba(37,99,235,.14)':'rgba(220,38,38,.14)'}" stroke="${diagramColor}" stroke-width="1.6"/>`;
+      {const vm=fn(s,.5);if(sgn&&Math.abs(vm)>1e-9){const cy=(y0+Y(vm))/2;occupied.push({x:(xa+xb)/2-10,y:cy-10,w:20,h:20});o+=`<circle cx="${(xa+xb)/2}" cy="${cy}" r="9" fill="var(--c)" stroke="${diagramColor}"/><text x="${(xa+xb)/2}" y="${cy+5}" text-anchor="middle" font-size="15" font-weight="700" fill="${diagramColor}">${vm>0?'+':'−'}</text>`}}
+      if(peak){
+        const x=xa+(xb-xa)*peak.t, v=fn(s,peak.t), y=Y(v);
+        o+=`<circle cx="${x}" cy="${y}" r="3" fill="${diagramColor}" stroke="var(--c)"/>`;
+        labels.push({x,y,v,txt:peak.value,end:0});
+      }
+      [[xa,fn(s,0),'start',0],[xb,fn(s,1),'end',1]].forEach(([x,v,a,w])=>{const signed=sym?sl(i,w):f(v);
+        const txt=fn===Fn
+          ?(sym?ps(v<0?pneg(SY[i][w?'N1':'N0']):SY[i][w?'N1':'N0']):f(Math.abs(v)))
+          :signed;
+        const dup=(w===0&&i>0&&signed===pe)||(!sym&&fn===Fn&&w===1&&s.q===0);
+        if(w===1)pe=signed;
+        if(txt&&txt!='0'&&!dup&&(sym||Math.abs(v)>1e-9))labels.push({x,y:Y(v),v,txt,end:w});
+      });
+    });
+    const intersects=(a,b)=>a.x<b.x+b.w+3&&a.x+a.w+3>b.x&&a.y<b.y+b.h+3&&a.y+a.h+3>b.y;
+    const clamp=(x,lo,hi)=>Math.max(lo,Math.min(hi,x));
+    let top=0,bottom=2*H+58;
+    labels.forEach(({x,y,v,txt,end})=>{
+      const plain=txt.replace(/<[^>]+>/g,''), h=txt.includes('class="frac"')?24:12;
+      const idealWidth=Math.max(14,plain.length*7+5),w=Math.min(808,idealWidth);
+      const side=end?-flip:flip;
+      const box={x:clamp(x+(side<0?-w-3:3),4,816-w),y:v>=0?y-h-3:y+3,w,h};
+      // Keep each value on its own segment's side of the boundary.
+      while(occupied.some(b=>intersects(box,b)) || (box.y<21&&box.y+h>2&&box.x<230)){
+        box.y+=(v>=0?-1:1)*(h+4);
+      }
+      top=Math.min(top,box.y-4);
+      bottom=Math.max(bottom,box.y+h+4);
+      o+=`<foreignObject x="${box.x}" y="${box.y}" width="${w}" height="${h}"><div xmlns="http://www.w3.org/1999/xhtml" class="plot-label" style="font-size:${9*w/idealWidth}px;text-align:${side<0?'right':'left'}">${txt}</div></foreignObject>`;
+    });
+    return `<svg viewBox="0 ${top} 820 ${bottom-top}">`+o+'</svg>';
+  };
+  const uF=sym?'':', '+un('F');
+  const methodLabel=solveBy==='internal'?'по внутренним усилиям':'по внешним усилиям';
+  $('#svgs').innerHTML=`<p class="n">Эпюры построены ${methodLabel}; продольная ось: ${axis.toUpperCase()}.</p>`+diagramScroll(sc)+diagramScroll(plot('Эпюра '+KT.N+uF,Fn,(i,w)=>w?T[i].N1:T[i].N0,1))+diagramScroll(plot('Эпюра '+KT.s+(sym?'':', МПа'),Sg,(i,w)=>w?T[i].s1:T[i].s0,1))+diagramScroll(plot(TQ?'Эпюра углов закручивания φ'+(sym?'':', рад'):'Эпюра перемещений Δl'+(sym?'':', мм'),Un,(i,w)=>w?T[i].u:T[i].u0,false,peaks));
+  // таблица
+  // Решение по участкам: без общего вводного абзаца, с осью из настроек.
+  const ax=axis, nU=sym?'':' '+un('F'), sU=sym?'':' МПа', dU=sym?'':' '+KT.dh, eU=sym?'':'·10⁻⁶';
+  let sl='';
+  const vn=i=>ax+subscript(num(i));
+  const ext=solveBy==='external',ltr=fromSupport(), equilibrium='Σ'+(TQ?'M':'F')+axis;
+  const mkr=MK;
+  const cutSvg=i=>{
+    const cxp=x=>flip===1?x:600-x;
+    const total=S.reduce((a,s)=>a+s.L,0),k=460/total,x1=70,x2=x1+total*k,cx=x1+(S[i].c+S[i].L/2)*k,a0=ltr?x1:cx,a1=ltr?cx:x2;
+    let z=`<svg viewBox="0 0 620 ${ext?220:216}"><text x="610" y="14" text-anchor="end" font-size="11" fill="var(--m)">Рассматриваем ${analysisFromLeft()?'левую':'правую'} часть</text><line x1="${cxp(a0)}" y1="82" x2="${cxp(a1)}" y2="82" stroke="var(--ink)" stroke-width="10"/>`;
+    S.forEach((g,j)=>{
+      const xa=x1+g.c*k,xe=xa+g.L*k,pa=Math.max(xa,a0),pb=Math.min(xe,a1);
+      if(pb<=pa+.5)return;
+      z+=`<text x="${cxp((pa+pb)/2)}" y="119" text-anchor="middle" font-size="10" fill="var(--secondary-ink)">${num(j)}</text>`;
+      if(j>0&&xa>a0+.5&&xa<a1-.5)z+=`<line x1="${cxp(xa)}" y1="73" x2="${cxp(xa)}" y2="91" stroke="var(--ink)" stroke-width="1.5"/>`;
+      if(Math.abs(g.q)>1e-12){const d=Math.sign(g.q),st=Math.max(10,Math.min(18,(pb-pa)/4));
+        for(let xx=pa+4;xx<pb-2;xx+=st)z+=TQ?arc(cxp(xx+6),82,flip*d,'var(--green)','cq'+i,13,4):`<line x1="${cxp(xx)}" y1="82" x2="${cxp(xx+d*12)}" y2="82" stroke="var(--green)" stroke-width="2" marker-end="url(#cq${i})"/>`;
+        z+=`<text x="${cxp((pa+pb)/2)}" y="${TQ?40:66}" text-anchor="middle" font-size="10" fill="var(--green)">${loadMagnitude(j,'q')}${loadUnit}</text>`}
+      if(Math.abs(g.F)>1e-12&&(ltr?j<i:j>=i)){const d=Math.sign(g.F);
+        z+=TQ?arc(cxp(xe),82,flip*d,'var(--red)','cf'+i,17,8)+`<text x="${cxp(xe)}" y="122" text-anchor="middle" font-size="10" font-weight="600" fill="var(--red)">${flip*d>0?'↺':'↻'} ${externalMark} = ${loadMagnitude(j,'F')}${forceUnit}</text>`:`<line x1="${cxp(xe)}" y1="82" x2="${cxp(xe+d*30)}" y2="82" stroke="var(--red)" stroke-width="2.5" marker-end="url(#cf${i})"/><text x="${cxp(xe+d*15)}" y="122" text-anchor="middle" font-size="10" font-weight="600" fill="var(--red)">${externalMark} = ${loadMagnitude(j,'F')}${forceUnit}</text>`}
+    });
+    [0,...S.map(s=>s.c+s.L)].forEach((v,j)=>{
+      const x=x1+v*k;
+      if(x>=a0-.001&&x<=a1+.001)z+=`<text x="${cxp(x)-4}" y="101" text-anchor="end" font-size="10" font-weight="600">${nodeName(j)}</text>`;
+    });
+    z+=`<line x1="${cxp(cx)}" y1="48" x2="${cxp(cx)}" y2="116" stroke="var(--cut-ink)" stroke-width="1.5" stroke-dasharray="3 3"/>`;
+    if(ltr){
+      z+=`<line x1="${cxp(x1)}" y1="59" x2="${cxp(x1)}" y2="105" stroke="var(--ink)" stroke-width="2"/>`;
+      for(let y=60;y<101;y+=8)z+=`<line x1="${cxp(x1)}" y1="${y}" x2="${cxp(x1-9)}" y2="${y+6}" stroke="var(--ink)"/>`;
+    }
+    if(ltr&&reaction){
+      const rv=Math.sign(reaction);
+      const x=cxp(x1);
+      z+=TQ?arc(x,82,flip*rv,'var(--orange)','cr'+i,17,8)
+        :`<line x1="${x}" y1="82" x2="${cxp(x1+rv*35)}" y2="82" stroke="var(--orange)" stroke-width="2.5" marker-end="url(#cr${i})"/>`;
+      z+=clampReactionLabel(x,620,flip>0,128,reactionName+' = '+reactionMagnitude+forceUnit);
+    }
+    if(!ext&&TQ)z+=arc(cxp(cx+(ltr?13:-13)),82,flip*(ltr?1:-1),'var(--a)','cn'+i,17,8)+`<text x="${cxp(cx+(ltr?13:-13))}" y="34" text-anchor="middle" font-size="12" font-weight="700" fill="var(--a)">Mк ${flip*(ltr?1:-1)>0?'↺':'↻'}</text>`;
+    else if(!ext){const d=ltr?1:-1;z+=`<line x1="${cxp(cx)}" y1="82" x2="${cxp(cx+d*38)}" y2="82" stroke="var(--a)" stroke-width="3" marker-end="url(#cn${i})"/><text x="${cxp(cx+d*19)}" y="70" text-anchor="middle" font-size="12" font-weight="700" fill="var(--a)">N</text>`}
+    else z+=`<text x="12" y="183" font-size="11" fill="var(--red)">${TQ?'внешние моменты (вид со стороны отсечённой части): по часовой → Mк &gt; 0, против → Mк &lt; 0':'внешние силы: от разреза → N &gt; 0, к разрезу → N &lt; 0'}</text>`;
+    S.forEach((g,j)=>{
+      const a=x1+g.c*k,b=a+g.L*k;
+      if(j!==i&&a>=a0-.001&&b<=a1+.001)z+=cutMeasure(cxp(a),cxp(b),201,lb(j,'L')+(sym?'':' '+un('L')));
+    });
+    const start=x1+(S[i].c+(ltr?0:S[i].L))*k;
+    z+=cutMeasure(cxp(start),cxp(cx),201,vn(i),'localCut'+i);
+    return z+`<defs>${mkr('localCut'+i,'var(--a)').replace('refX="1.6"','refX="9.4"')+mkr('cq'+i,'var(--green)')+mkr('cf'+i,'var(--red)')+mkr('cr'+i,'var(--orange)')+mkr('cn'+i,'var(--a)')}</defs></svg>`;
+  };
+  const loads=S.flatMap((section,i)=>{
+    if(sym)return [...monomialTexts(PR[i].F),...monomialTexts(pmul(PR[i].q,PR[i].L))];
+    return [section.F?f(Nf(section.F))+forceUnit:'0',section.q?f(R[i].q)+loadUnit+' · '+f(R[i].L)+' '+un('L'):'0'];
+  });
+  sl+=`<p><b>Реакция заделки ${reactionName}</b><br>${equilibrium} = 0 → ${equilibriumTerms(reactionName,loads)} = 0<br>${reactionName} = ${Rr}${nU}</p>`;
+
+  sl+='<h3>Функции и значения по участкам</h3><p class="n">Локальная координата отсчитывается от границы участка со стороны заделки.</p>';
+  ord.forEach(i=>{
+    const s=S[i],r=T[i],v=vn(i),peak=peaks[i],y=sym?SY[i]:null;
+    const length=lb(i,'L')+(sym?'':' '+un('L'));
+    const derivative=sym?pneg(PR[i].q):-s.q*lu;
+    const stressSlope=sym?pdiv(derivative,PR[i].W):sg(derivative,s);
+    const strainSlope=sym?pdiv(stressSlope,Ep):stressSlope*1e12/E;
+    const stiffness=sym?pmul(Ep,PR[i].I):E*s.I;
+    const displacement=sym?[y.u0,pdiv(y.N0,stiffness),pdiv(psc(derivative,.5),stiffness)]
+      :[s.u0*KT.dk,s.N0*lu*KT.dk/stiffness,derivative*lu*KT.dk/(2*stiffness)];
+    const format=(name,coefficients,unit)=>name+'('+v+') = '+sectionFunction(coefficients,v,sym,unit.trim(),un('L'));
+    const effortCoefficients=sym?[y.N0,derivative]:[Nf(s.N0),Nf(derivative)];
+    const effort=format(KT.N,effortCoefficients,nU);
+    printFunctions.push(`<p><b>Участок ${num(i)}</b><br>${effort}</p>`);
+    const external=sectionFunction(ltr?effortCoefficients.map(sym?pneg:n=>-n):effortCoefficients,v,sym,nU.trim(),un('L'));
+    const derivation=ext?'':cutEquilibrium(equilibrium,(ltr?'':'−')+KT.N+'('+v+')',external);
+    const valueName=TQ?'φ':'u';
+    const extremum=peak?extremumText(s.N0>0?'максимум':'минимум',effort,v,peak.root,valueName,peak.value+dU,sym):'';
+    sl+=`<h4>Участок ${num(i)}</h4><div class="cutbox">${diagramScroll(cutSvg(i))}</div><p>0 ≤ ${v} ≤ ${length}<br>${derivation}${effort}<br>
+      ${format(KT.s,sym?[y.s0,stressSlope]:[sg(s.N0,s),stressSlope],sU)}<br>
+      ${format(KT.e,sym?[y.e0,strainSlope]:[sg(s.N0,s)*1e12/E,strainSlope],eU)}<br>
+      ${format(valueName,displacement,dU)}${extremum}</p>`;
+    sl+=sectionTable(v,length,[KT.N+nU,KT.s+sU,KT.e+eU,valueName+dU],
+      [r.N0,r.s0,r.e0,sym?r.u0:f(s.u0*KT.dk)],[r.N1,r.s1,r.e1,r.u]);
+  });
+  let mx=0,mi=0;S.forEach((s,i)=>{const v=Math.max(Math.abs(sg(s.N0,s)),Math.abs(sg(s.N1,s)));if(v>mx){mx=v;mi=i}});
+  sl+=sym?`<p><b>Итог:</b> ${TQ?'угол закручивания вала φ':'удлинение стержня Δl'} = ${T[T.length-1].u}.</p>`:`<p><b>Итог:</b> ${TQ?'угол закручивания вала φ = '+f(u)+' рад = '+f(u*180/Math.PI)+'°; max|τ| = ':'удлинение стержня Δl = '+f(u*1e3)+' мм; max|σ| = '}${f(mx)} МПа на участке ${num(mi)}.</p>`;
+  $('#sol').innerHTML=sl;
+
+
+}
+const beamFields=['beamType','pinA','pinB','beamMomentUnit'];
+beamFields.forEach(id=>$('#'+id).onchange=calc);
+let beamNodeCount=0, beamNodeDirection;
+function beamNodes(){
+  const count=rows.length+1;
+  if(count===beamNodeCount&&beamNodeDirection===analysisFromLeft())return;
+  for(const id of ['pinA','pinB']){
+    const select=$('#'+id), previous=select.value, wasEnd=+previous===beamNodeCount-1;
+    select.innerHTML='';
+    for(let i=0;i<count;i++)select.add(new Option('Узел '+nodeLetter(i,count-1)+(i===0?' (левый конец)':i===count-1?' (правый конец)':''),i));
+    select.value=id==='pinB'&&(!previous||wasEnd)?count-1:Math.min(+previous,count-1);
+  }
+  beamNodeCount=count;
+  beamNodeDirection=analysisFromLeft();
+}
+function calcBeam(){
+  const sym=$('#mode').value==='sym', pins=$('#beamType').value==='pins', ltr=analysisFromLeft();
+  const axis=$('#axis').value, internal=$('#solveBy').value==='internal';
+  const unitF=$('#uF').value, unitL=$('#uL').value, unitM=$('#beamMomentUnit').value;
+  const momentFactor=sym?1:UK.tor.F[unitM]/(U.F[unitF]*U.L[unitL]);
+  $('#beamSupports').hidden=$('#pinALabel').hidden=$('#pinBLabel').hidden=!pins;
+  $('#supportLabel').hidden=pins;
+  $('#areaUnitsLabel').hidden=$('#modulusLabel').hidden=true;
+  $('#forceUnitsLabel').hidden=$('#beamMomentUnitLabel').hidden=sym;
+  $('#uL').disabled=$('#uF').disabled=sym;
+  loadUnitLabel(sym?'':unitF+'/'+unitL);
+  beamNodes();
+  const neg=pneg, add=padd, mul=pmul, scale=psc, sum=list=>list.reduce(add,{});
+  const minus=(a,b)=>add(a,neg(b));
+  const read=(row,i,key)=>readAt(rowField(i,key),()=>sym?parse(row[key]):pc(finiteInput(row[key])));
+  try{
+    const S=rows.map((r,i)=>({L:read(r,i,'L'),q:read(r,i,'q'),F:read(r,i,'F'),C:scale(read(r,i,'M'),momentFactor)}));
+    const startForce=readStartLoad('startV',sym),startMoment=scale(readStartLoad('startM',sym),momentFactor);
+    const names=[...new Set([...S.flatMap(Object.values),startForce,startMoment].flatMap(p=>Object.values(p).flatMap(t=>Object.keys(t.e))))].filter(n=>n!=='π').sort();
+    const values={π:Math.PI};
+    names.forEach(n=>values[n]=1);
+    const ev=p=>peval(p,values);
+    if(!Number.isFinite(ev(startForce)))throw validationError('Сила в начальном узле должна быть конечной.','#startV');
+    if(!Number.isFinite(ev(startMoment)))throw validationError('Момент в начальном узле должен быть конечным.','#startM');
+
+    S.forEach((s,i)=>{
+      if(!Number.isFinite(ev(s.L))||ev(s.L)<=0)throw validationError('Длина участка должна быть положительной и конечной.',rowField(i,'L'));
+      for(const [key,value] of [['q',s.q],['F',s.F],['M',s.C]]){
+        if(!Number.isFinite(ev(value)))throw validationError('Нагрузка должна иметь конечное значение.',rowField(i,key));
+      }
+    });
+    const nodes=[{}];
+    S.forEach(s=>nodes.push(add(nodes[nodes.length-1],s.L)));
+    const end=S.length;
+    const ia=pins?+$('#pinA').value:mirrored()?end:0, ib=+$('#pinB').value;
+    if(pins&&ia===ib)throw validationError('Выберите разные узлы для шарнирных опор.','#pinA','#pinB');
+    const applied=S.flatMap((s,i)=>[
+      {x:nodes[i+1],F:s.F,C:s.C,node:i+1},
+      {x:add(nodes[i],scale(s.L,.5)),F:mul(s.q,s.L),C:{},q:s.q,L:s.L,distributed:true,segment:i}
+    ]);
+    applied.unshift({x:nodes[0],F:startForce,C:startMoment,node:0});
+    const totalF=sum(applied.map(a=>a.F));
+    const momentAbout=(list,x)=>sum(list.map(a=>add(mul(a.F,minus(a.x,x)),a.C)));
+    const externalM=momentAbout(applied,nodes[ia]);
+    const rb=pins?divideBeamSpan(neg(externalM),minus(nodes[ib],nodes[ia]),sym):{};
+    const ra=neg(add(totalF,rb)), ca=pins?{}:neg(externalM);
+    const reactions=[{x:nodes[ia],F:ra,C:ca,node:ia,support:true}];
+    if(pins)reactions.push({x:nodes[ib],F:rb,C:{},node:ib,support:true});
+    const concentrated=applied.filter(a=>!a.distributed).concat(reactions);
+    const result=S.map((s,i)=>{
+      const x=nodes[i];
+      const side=concentrated.filter(a=>ltr?a.node<=i:a.node>i).concat(applied.filter(a=>a.distributed&&(ltr?a.segment<i:a.segment>i)));
+      const sideForce=sum(side.map(a=>a.F));
+      const sideMoment=momentAbout(side,x);
+      const qL=mul(s.q,s.L);
+      const Q=ltr?sideForce:neg(add(sideForce,qL));
+      const M=ltr?neg(sideMoment):add(sideMoment,scale(mul(qL,s.L),.5));
+      return {Q,M,side};
+    });
+    const plain=(p,wrap)=>sym?ps(p,wrap):f(ev(p));
+    const coefficients=values=>sym?values:values.map(ev);
+    const linear=(constant,slope,x)=>{
+      if(sym)return sectionFunction([constant,pc(slope)],x,true);
+      const offset=plain(constant);
+      if(offset==='0')return slope<0?'−'+x:x;
+      return offset+' '+unitL+(slope<0?' − ':' + ')+x;
+    };
+    const grouped=text=>/ [−+] /.test(text)?'('+text+')':text;
+    const product=(first,unit,...factors)=>{
+      if(!Object.keys(first).length||factors.includes('0'))return '0';
+      return grouped(plain(first))+(sym?'':' '+unit)+' · '+factors.map(grouped).join(' · ');
+    };
+    const measure=p=>plain(p)+(sym?'':' '+unitL);
+    const momentTerm=p=>Object.keys(p).length?plain(p)+(sym?'':' '+unitF+'·'+unitL):'0';
+    const half=text=>fraction(text,'2');
+    const cutMomentTerms=(i,x,sign)=>{
+      const start=nodes[i], current=S[i];
+      const direction=ltr?1:-1;
+      const terms=result[i].side.flatMap(a=>{
+        const arm=linear(scale(minus(start,a.x),direction),direction,x);
+        return a.distributed?[product(scale(a.q,sign),unitF+'/'+unitL,measure(a.L),arm)]
+          :[product(scale(a.F,sign),unitF,arm),momentTerm(scale(a.C,-direction*sign))];
+      });
+      const loadedLength=ltr?x:linear(current.L,-1,x);
+      terms.push(product(scale(current.q,sign),unitF+'/'+unitL,loadedLength,half(loadedLength)));
+      return terms;
+    };
+    const mUnit=sym?'':' '+unitF+'·'+unitL;
+    const fUnit=sym?'':' '+unitF;
+    const at=(i,t)=>{
+      const s=S[i], r=result[i], dx=scale(s.L,t);
+      return [add(r.Q,mul(s.q,dx)),sum([r.M,mul(r.Q,dx),scale(mul(s.q,mul(dx,dx)),.5)])];
+    };
+    const order=S.map((_,i)=>i);
+    if(!ltr)order.reverse();
+    const n=i=>order.indexOf(i)+1;
+    const reactionNames={
+      a:effortMark('R','y',nodeLetter(ia,end)), b:effortMark('R','y',nodeLetter(ib,end)),
+      horizontal:effortMark('R',axis,nodeLetter(ia,end)),
+      moment:effortMark('M',momentAxis(axis),nodeLetter(ia,end))
+    };
+    const reactionSummary=format=>(pins?reactionNames.horizontal+' = 0'+fUnit+'; ':'')+reactionNames.a+' = '+format(ra)+fUnit+
+      (pins?'; '+reactionNames.b+' = '+format(rb)+fUnit:'; '+reactionNames.moment+' = '+format(ca)+mUnit);
+    const reactionText=reactionSummary(p=>plain(p));
+    const peaks=S.map((s,i)=>{
+      const r=result[i], q0=ev(r.Q), q1=ev(at(i,1)[0]);
+      if(!crossesZero(q0,q1))return null;
+      const dx=-q0/ev(s.q), t=dx/ev(s.L);
+      const root=sym?polynomialRatio(neg(r.Q),s.q):fraction(f(-q0),f(ev(s.q)))+' = '+f(dx)+' '+unitL;
+      const denominator=scale(s.q,2);
+      const numerator=minus(mul(r.M,denominator),mul(r.Q,r.Q));
+      const ordinate=at(i,t)[1];
+      const value=sym?polynomialRatio(numerator,denominator):plain(ordinate);
+      const magnitude=sym?polynomialRatio(ev(ordinate)<0?neg(numerator):numerator,denominator):f(Math.abs(ev(ordinate)));
+      return {t,root,value,magnitude};
+    });
+    const view={S,nodes,concentrated,pins,ia,ib,n,ltr,axis,internal,ev,at,plain,sym,fUnit,mUnit,reactionNames,peaks};
+    $('#svgs').innerHTML='<p class="n">Реакции опор: '+reactionSummary(p=>plain(ev(p)<0?neg(p):p))+'</p>'+[beamDrawing(view),beamPlot(view,0),beamPlot(view,1)].map(diagramScroll).join('');
+    const loadTerms=(p,unit)=>sym?monomialTexts(p):Object.keys(p).length?[plain(p)+unit]:[];
+    const forceBalance=equilibriumTerms(reactionNames.a+(pins?' + '+reactionNames.b:''),applied.flatMap(a=>loadTerms(a.F,fUnit)));
+    const momentTerms=applied.flatMap(a=>{
+      const arm=minus(a.x,nodes[ia]);
+      if(!Object.keys(arm).length)return loadTerms(a.C,mUnit);
+      const signedArm=ev(arm)<0?neg(arm):arm;
+      const signedLoad=ev(arm)<0?neg(a.distributed?a.q:a.F):(a.distributed?a.q:a.F);
+      const term=a.distributed?product(signedLoad,unitF+'/'+unitL,measure(a.L),measure(signedArm)):product(signedLoad,unitF,measure(signedArm));
+      return [term,...loadTerms(a.C,mUnit)];
+    });
+    const supportSpan=pins?minus(nodes[ib],nodes[ia]):{};
+    const arm=sym?plain(supportSpan,true):measure(supportSpan);
+    const momentBalance=equilibriumTerms(pins?reactionNames.b+' · '+arm:reactionNames.moment,momentTerms);
+    $('#sol').innerHTML=`<p><b>Реакции опор</b><br>ΣFᵧ = 0 → ${forceBalance} = 0<br>
+      ΣM относительно ${nodeLetter(ia,end)} = 0 → ${momentBalance} = 0<br>${reactionText}</p>`+
+      '<p>'+(internal?'В разрезе: Q '+(ltr?'вниз, M против часовой стрелки.':'вверх, M по часовой стрелке.'):'По внешним усилиям: Q положительна, если сила поворачивает отсечённую часть по часовой. M откладывается на стороне растянутых волокон.')+'</p>'+
+      '<h3>Функции и значения по участкам</h3>'+
+      order.map(i=>{
+        const r=result[i],s=S[i],x=axis+subscript(n(i)),peak=peaks[i];
+        const qTerms=[r.Q,s.q];
+        const equation=terms=>sectionFunction(coefficients(terms),x,sym,unitF,unitL);
+        const effort='Q('+x+') = '+equation(qTerms);
+        const momentTerms=cutMomentTerms(i,x,1).filter(term=>term!=='0');
+        const moment='M('+x+') = '+(momentTerms.length?equilibriumTerms(momentTerms[0],momentTerms.slice(1)):'0');
+        const shortMoment=sectionFunction(coefficients([r.M,r.Q,scale(s.q,.5)]),x,sym,mUnit.trim(),unitL);
+        printFunctions.push(`<p><b>Участок ${n(i)}</b><br>${effort}<br>M(${x}) = ${shortMoment}</p>`);
+        const derivation=internal
+          ?cutEquilibrium('ΣFy',(ltr?'−':'')+'Q('+x+')',equation(ltr?qTerms:qTerms.map(neg)))+
+           'ΣM относительно разреза = 0 → '+equilibriumTerms((ltr?'':'−')+'M('+x+')',cutMomentTerms(i,x,ltr?-1:1))+' = 0<br>'
+          :'';
+        const length=plain(s.L)+(sym?'':' '+unitL);
+        const table=sectionTable(x,length,['Q'+fUnit,'M'+mUnit],
+          at(i,0).map(value=>plain(value)),at(i,1).map(value=>plain(value)));
+        const extremum=peak?`${extremumText(ev(r.Q)>0?'максимум':'минимум',effort,x,peak.root,'M',peak.value+mUnit,sym)}`:'';
+        return `<h4>Участок ${n(i)}</h4><div class="cutbox">${diagramScroll(beamDrawing(view,i))}</div><p>0 ≤ ${x} ≤ ${length}<br>
+          ${derivation}${effort}<br>${moment}${extremum}</p>`+table;
+      }).join('');
+    $('#out').hidden=false;$('#err').hidden=true;
+  }catch(e){$('#out').hidden=true;$('#err').hidden=false;$('#err').textContent=e.message}
+}
+function divideBeamSpan(numerator,span,sym){
+  if(Object.keys(span).length!==1&&sym)throw validationError('В буквенном режиме расстояние между опорами должно упрощаться до одночлена. Можно задать длины через общий символ l.','#pinA','#pinB','#tb [data-k="L"]');
+  return pdiv(numerator,span);
+}
+function beamDrawing(v,cut){
+  const {S,nodes,concentrated,pins,ia,ib,n,ltr,axis,internal,ev,plain,sym,fUnit,mUnit,reactionNames}=v;
+  const total=ev(nodes[S.length]), X=x=>80+660*x/total;
+  const c=cut===undefined?null:(ev(nodes[cut])+ev(S[cut].L)/2), lo=c!==null&&!ltr?c:0, hi=c!==null&&ltr?c:total;
+  const included=x=>x>=lo&&x<=hi;
+  const colors={force:'var(--red)',distributed:'var(--green)',reaction:'var(--orange)',cut:'var(--a)',axis:'var(--secondary-ink)'};
+  const id='beam'+(cut===undefined?'Full':cut);
+  const line=(x,y,u,w,color,arrow=false,width=1.6)=>`<line x1="${x}" y1="${y}" x2="${u}" y2="${w}" stroke="${colors[color]||color}" stroke-width="${width}"${arrow?' marker-end="url(#'+id+color+')"':''}/>`;
+  const label=(x,y,t,color='var(--ink)')=>`<text x="${x}" y="${y}" text-anchor="middle" font-size="11" fill="${colors[color]||color}">${t}</text>`;
+  const math=(x,y,t,color,alignRightOfPoint=false)=>{
+    const left=alignRightOfPoint?x+17:Math.max(0,Math.min(694,x-63));
+    const width=alignRightOfPoint?818-left:126;
+    const alignment=alignRightOfPoint?'text-align:left;white-space:normal;':'';
+    return `<foreignObject x="${left}" y="${y}" width="${width}" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="plot-label" style="${alignment}color:${colors[color]}">${t}</div></foreignObject>`;
+  };
+  const surface=value=>105+Math.sign(value)*2.5;
+  const force=(x,value,color,length=31,side=Math.sign(value))=>{
+    const edge=surface(side), outer=edge+side*length;
+    return Math.sign(value)===side
+      ?line(x,outer,x,edge,color,true)
+      :line(x,edge,x,outer,color,true);
+  };
+  const distributedLoads=[];
+  const lengthLabelY=S.some(section=>ev(section.q)>0)?185:151;
+  // Counterclockwise couple: upper arrow left, lower arrow right.
+  const couple=(x,value,color)=>{
+    const d=Math.sign(value),y=105;
+    const height=color==='force'?16:11, arm=color==='force'?30:20;
+    const width=color==='force'?2.2:1.6;
+    return `<g transform="rotate(-20 ${x} ${y})">${line(x,y-height,x,y+height,color,false,width)+line(x,y-height,x-d*arm,y-height,color,true,width)+line(x,y+height,x+d*arm,y+height,color,true,width)}</g>`;
+  };
+  let svg='<svg viewBox="0 0 820 '+(c===null?225:253)+'"><defs>'+Object.entries(colors).map(([key,col])=>MK(id+key,col).replace('refX="1.6"','refX="9.4"')).join('')+'</defs>';
+  svg+=line(X(lo),105,X(hi),105,'var(--ink)',false,5);
+  if(c===null)svg+=line(ltr?72:748,105,ltr?797:15,105,'axis',true)+label(ltr?808:6,109,axis,'axis');
+  S.forEach((s,i)=>{
+    const a=Math.max(lo,ev(nodes[i])),b=Math.min(hi,ev(nodes[i+1]));
+    if(b<=a)return;
+    svg+=label((X(a)+X(b))/2,122,n(i));
+    const q=ev(s.q);
+    if(c===null)svg+=label((X(a)+X(b))/2,lengthLabelY,(sym?'':'L = ')+plain(s.L)+(sym?'':' '+$('#uL').value));
+    if(q){
+      distributedLoads.push({a,b,q});
+      const y=105+Math.sign(q)*38;
+      svg+=line(X(a),y,X(b),y,'distributed');
+      const count=Math.max(1,Math.ceil((X(b)-X(a))/24));
+      for(let k=0;k<=count;k++){
+        const x=X(a+(b-a)*k/count);
+        svg+=line(x,y,x,surface(q),'distributed',true);
+      }
+      svg+=math((X(a)+X(b))/2,y+(q>0?4:-27),plain(q<0?pneg(s.q):s.q)+(sym?'':fUnit+'/'+$('#uL').value),'distributed');
+    }
+  });
+  for(const index of pins?[ia,ib]:[ia]){
+    const pos=ev(nodes[index]),x=X(pos);
+    if(!included(pos))continue;
+    if(pins){
+      svg+=`<path d="M${x} 107l-11 18h22Z" fill="var(--c)" stroke="var(--ink)"/>`;
+      if(index===ib)svg+=`<circle cx="${x-5}" cy="129" r="3" fill="var(--c)" stroke="var(--ink)"/><circle cx="${x+5}" cy="129" r="3" fill="var(--c)" stroke="var(--ink)"/>`;
+      const y=index===ib?134:126;
+      svg+=line(x-15,y,x+15,y,'var(--ink)');
+    }else{
+      const d=index===0?-1:1;
+      svg+=line(x,82,x,129,'var(--ink)',false,2);
+      for(let y=83;y<124;y+=8)svg+=line(x,y,x+d*9,y+6,'var(--ink)');
+    }
+
+  }
+  nodes.forEach((node,i)=>{
+    const pos=ev(node);
+    if(included(pos))svg+=`<text x="${X(pos)-(i===ia||(pins&&i===ib)?20:4)}" y="119" text-anchor="end" font-size="11" font-weight="600">${nodeLetter(i,S.length)}</text>`;
+  });
+  concentrated.forEach(a=>{
+    const pos=ev(a.x);
+    if(!included(pos))return;
+    const color=a.support?'reaction':'force', x=X(pos), F=ev(a.F), C=ev(a.C);
+    const forceName=a.node===ia?reactionNames.a:reactionNames.b;
+    if(F){
+      const text=(a.support?forceName:effortMark('F','y'))+' = '+plain(F<0?pneg(a.F):a.F)+fUnit;
+      let side=Math.sign(F);
+      if(distributedLoads.length){
+        const distance=load=>Math.max(load.a-pos,pos-load.b,0);
+        const nearest=distributedLoads.reduce((best,load)=>distance(load)<distance(best)?load:best);
+        side=-Math.sign(nearest.q);
+      }
+      const y=surface(side)+side*(a.support?40:23)-9;
+      svg+=force(x,F,color,a.support?48:31,side);
+      if(!a.support&&a.node===S.length)svg+=math(x,y,text,color,true);
+      else if(a.support&&(!pins||a.node===Math.min(ia,ib)))svg+=clampReactionLabel(x,820,pins||ia===0,y,text);
+      else svg+=math(x+(a.support?-45:45),y,text,color);
+    }
+    if(C){
+      svg+=couple(x,C,color);
+      if(a.support){
+        svg+=clampReactionLabel(x,820,ia===0,66,reactionNames.moment+' = '+plain(C<0?pneg(a.C):a.C)+mUnit);
+      }else svg+=math(x-43,65,effortMark('M',momentAxis(axis))+' = '+plain(C<0?pneg(a.C):a.C)+mUnit,color);
+    }
+  });
+  if(c!==null){
+    const x=X(c);
+    svg+=line(x,53,x,156,'var(--ink)');
+    if(internal)svg+=force(x,ltr?-1:1,'cut')+couple(x,ltr?1:-1,'cut')+label(x+(ltr?12:-12),ltr?79:136,'Q','cut')+label(x+(ltr?-25:25),136,'M','cut');
+  }
+
+  if(c!==null){
+    S.forEach((section,i)=>{
+      const a=ev(nodes[i]),b=ev(nodes[i+1]);
+      if(i!==cut&&included(a)&&included(b))svg+=cutMeasure(X(a),X(b),235,esc(rows[i].L)+(sym?'':' '+$('#uL').value));
+    });
+    svg+=cutMeasure(X(ev(nodes[cut+(ltr?0:1)])),X(c),235,axis+subscript(n(cut)),id+'cut');
+  }
+  return svg+'</svg>';
+}
+function beamPlot(v,k){
+  const {S,nodes,ev,at,plain,fUnit,mUnit,internal}=v;
+  const total=ev(nodes[S.length]), X=x=>80+660*x/total;
+  const samples=S.map((s,i)=>{
+    const t=Array.from({length:25},(_,j)=>j/24);
+    if(k&&v.peaks[i])t.push(v.peaks[i].t);
+    return t.sort((a,b)=>a-b).map(t=>({t,p:at(i,t)[k]}));
+  });
+  const max=Math.max(...samples.flat().map(a=>Math.abs(ev(a.p))))||1;
+  const Y=p=>110-64*ev(p)/max, color=internal?'var(--a)':'var(--red)';
+  let svg=`<text x="5" y="15" font-size="13" font-weight="600">Эпюра ${k?'M'+mUnit:'Q'+fUnit}</text><line x1="65" y1="110" x2="755" y2="110" stroke="var(--ink)"/>`;
+  nodes.forEach(node=>{
+    const x=X(ev(node));
+    svg+=`<line x1="${x}" y1="26" x2="${x}" y2="190" stroke="var(--guide)" stroke-dasharray="3 3"/>`;
+  });
+  const boxes=[];
+  let top=0,bottom=205;
+  let previousEnd;
+  samples.forEach((points,i)=>{
+    const x=t=>X(ev(nodes[i])+t*ev(S[i].L));
+    svg+=`<polygon points="${x(0)},110 ${points.map(a=>x(a.t)+','+Y(a.p)).join(' ')} ${x(1)},110" stroke="${color}" fill="${color}" fill-opacity=".13"/>`;
+    const first=points[0],last=points[points.length-1];
+    const peak=k&&v.peaks[i];
+    const startText=plain(first.p),endText=plain(last.p);
+    const sameBoundary=!v.sym&&startText===previousEnd;
+    const flat=!v.sym&&ev(S[i].q)===0&&(!k||ev(at(i,0)[0])===0);
+    previousEnd=endText;
+    const labels=peak?[first,{t:peak.t,p:at(i,peak.t)[k],value:peak.magnitude},last]:[first,last];
+    labels.forEach(({t,p,value})=>{
+      if(value===undefined&&(!Object.keys(p).length||(t===0&&sameBoundary)||(t===1&&flat)))return;
+      if(value!==undefined)svg+=`<circle cx="${x(t)}" cy="${Y(p)}" r="3" fill="${color}" stroke="var(--c)"/>`;
+      const txt=value??plain(ev(p)<0?pneg(p):p), chars=txt.replace(/<[^>]+>/g,'').length;
+      const w=Math.min(810,Math.max(16,chars*7+5)),h=txt.includes('class="frac"')?24:12,up=ev(p)>=0;
+      const b={x:Math.max(4,Math.min(816-w,x(t)+(t===1?-w-3:3))),y:Y(p)+(up?-h-3:3),w,h};
+      while(boxes.some(a=>a.x<b.x+w+2&&a.x+a.w+2>b.x&&a.y<b.y+h+2&&a.y+a.h+2>b.y))b.y+=(up?-1:1)*(h+4);
+      boxes.push(b);top=Math.min(top,b.y-4);bottom=Math.max(bottom,b.y+h+4);
+      svg+=`<foreignObject x="${b.x}" y="${b.y}" width="${w}" height="${h}"><div xmlns="http://www.w3.org/1999/xhtml" class="plot-label" style="text-align:${t===1?'right':'left'}">${txt}</div></foreignObject>`;
+    });
+  });
+  return `<svg viewBox="0 ${top} 820 ${bottom-top}">${svg}</svg>`;
+}
+
+const frameDirections={right:[1,0],left:[-1,0],up:[0,1],down:[0,-1]};
+const frameDirectionNames={right:'Вправо',left:'Влево',up:'Вверх',down:'Вниз'};
+const frameControls=['frameType','frameA','frameB','frameC','frameRoll','beamMomentUnit'];
+frameControls.filter(key=>key!=='beamMomentUnit').forEach(key=>$('#'+key).onchange=calc);
+const frameNodeName=i=>String.fromCharCode(65+i);
+function frameNodes(){
+  ['frameA','frameB','frameC'].forEach((key,index)=>{
+    const field=$('#'+key);
+    const previous=field.value;
+    field.innerHTML='';
+    for(let i=0;i<=rows.length;i++)field.add(new Option(frameNodeName(i),String(i)));
+    field.value=previous!==''&&Number(previous)<=rows.length?previous:String(Math.min(index,rows.length));
+  });
+}
+function buildFrame(){
+  const names={L:'Длина L',q:'Поперечная q',H:'Горизонтальная сила',V:'Вертикальная сила',M:'Момент'};
+  $('#tb').innerHTML=rows.map((row,i)=>{
+    const options=(key,label,choices)=>`<td><label><span class="mobile-field">${label}</span><select aria-label="${label}" data-i="${i}" data-k="${key}">${choices.map(([value,text])=>`<option value="${value}"${String(row[key])===String(value)?' selected':''}>${text}</option>`).join('')}</select></label></td>`;
+    const parent=options('P','От узла',Array.from({length:i+1},(_,j)=>[j,frameNodeName(j)]));
+    const direction=options('D','Направление',Object.entries(frameDirectionNames));
+    const fields=Object.entries(names).map(([key,name])=>`<td><label><span class="mobile-field">${name}</span><input aria-label="${name}" type="text" autocapitalize="off" spellcheck="false" value="${esc(row[key])}" data-i="${i}" data-k="${key}"></label></td>`).join('');
+    return `<tr><td>${i+1} · до ${frameNodeName(i+1)}</td>${parent}${direction}${fields}<td class="noprint">${i===rows.length-1&&i>0?`<button class="s" onclick="del(${i})" aria-label="Удалить стержень ${i+1}">✕</button>`:''}</td></tr>`;
+  }).join('');
+  $('#addBtn').disabled=rows.length>=10;
+  frameNodes();
+}
+function frameIntersection(a,b,c,d){
+  const bounds=(p,q,k)=>[Math.min(p[k],q[k]),Math.max(p[k],q[k])];
+  const epsilon=1e-9;
+  const overlap=[0,1].map(k=>{
+    const [lo,hi]=bounds(a,b,k),[left,right]=bounds(c,d,k);
+    return [Math.max(lo,left),Math.min(hi,right)];
+  });
+  if(overlap.some(([lo,hi])=>hi<lo-epsilon))return false;
+  if(overlap.some(([lo,hi])=>hi-lo>epsilon))return true;
+  const equal=(p,q)=>p.every((v,k)=>Math.abs(v-q[k])<=epsilon);
+  return ![a,b].some(p=>[c,d].some(q=>equal(p,q)));
+}
+function generateFrame(){
+  const sym=$('#mode').value==='sym';
+  const integer=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+  const choose=list=>list[integer(0,list.length-1)];
+  const lengthScale=U.L[$('#uL').value];
+  const forceScale=U.F[$('#uF').value];
+  const momentScale=UK.tor.F[$('#beamMomentUnit').value];
+  const symbolic=(n,base)=>(n===1?'':n)+base;
+  const load=(max,base,scale)=>Math.random()<.5?0:sym?symbolic(integer(1,5),base):Number((integer(1,max)*scale).toPrecision(12));
+  const count=integer(2,5);
+  const positions=[[0,0]],members=[];
+  rows=[];
+  for(let i=0;i<count;i++){
+    const choices=[];
+    for(let p=0;p<positions.length;p++)for(const [D,direction] of Object.entries(frameDirections)){
+      if(i===1&&(direction[0]!==0)===(frameDirections[rows[0].D][0]!==0))continue;
+      for(let length=1;length<=4;length++){
+        const start=positions[p],end=start.map((v,k)=>v+direction[k]*length);
+        if(positions.some(point=>point.every((v,k)=>v===end[k])))continue;
+        if(members.some(([a,b])=>frameIntersection(start,end,a,b)))continue;
+        choices.push({p,D,length,start,end});
+      }
+    }
+    const {p,D,length,start,end}=choose(choices);
+    positions.push(end);
+    members.push([start,end]);
+    rows.push({P:p,D,L:sym?symbolic(length,'l'):length/lengthScale,
+      q:load(20,'q',1000*lengthScale/forceScale),H:load(50,'ql',1000/forceScale),
+      V:load(50,'ql',1000/forceScale),M:load(30,'ql²',1000/momentScale)});
+  }
+  const configurations={pins:[],rollers:[]};
+  for(const roll of ['h','y']){
+    const armAxis=roll==='h'?1:0;
+    positions.forEach((a,i)=>positions.forEach((b,j)=>{
+      if(a[armAxis]===b[armAxis])return;
+      configurations.pins.push({roll,i,j,k:0});
+      positions.forEach((_,k)=>{if(k!==i&&k!==j)configurations.rollers.push({roll,i,j,k})});
+    }));
+  }
+  const type=choose(['fixed','pins','rollers']);
+  const ends=positions.map((_,i)=>i).filter(i=>rows.filter((row,j)=>Number(row.P)===i||j+1===i).length===1);
+  const support=type==='fixed'?{roll:'y',i:choose(ends),j:0,k:0}:choose(configurations[type]);
+  for(const node of type==='fixed'?[support.i]:type==='pins'?[support.i,support.j]:[support.i,support.j,support.k]){
+    if(node>0){
+      rows[node-1].H=rows[node-1].V=0;
+      if(type==='fixed')rows[node-1].M=0;
+    }
+  }
+  if(!rows.some(row=>row.q||row.H||row.V||row.M))rows[integer(0,count-1)].q=sym?'q':1000*lengthScale/forceScale;
+  build();
+  $('#frameType').value=type;
+  $('#frameRoll').value=support.roll;
+  ['frameA','frameB','frameC'].forEach((key,i)=>$('#'+key).value=String([support.i,support.j,support.k][i]));
+  calc();
+}
+function frameRetainedNodes(members,cut,forward){
+  const selected=members[cut],retained=new Set([forward?selected.p:selected.node]);
+  for(const node of retained)members.forEach((m,i)=>{
+    if(i===cut)return;
+    if(m.p===node)retained.add(m.node);
+    if(m.node===node)retained.add(m.p);
+  });
+  return retained;
+}
+function calcFrame(){
+  const sym=$('#mode').value==='sym', ltr=analysisFromLeft(), axis=$('#axis').value;
+  const internal=$('#solveBy').value==='internal';
+  const type=$('#frameType').value||'fixed';
+  const roll=$('#frameRoll').value||'y';
+  $('#beamTypeLabel').hidden=$('#beamSupports').hidden=$('#supportLabel').hidden=true;
+  $('#frameALabel').hidden=type==='none';
+  $('#frameBLabel').hidden=$('#frameRollLabel').hidden=type==='fixed'||type==='none';
+  $('#frameCLabel').hidden=type!=='rollers';
+  $('#areaUnitsLabel').hidden=$('#modulusLabel').hidden=true;
+  $('#forceUnitsLabel').hidden=$('#beamMomentUnitLabel').hidden=sym;
+  $('#uL').disabled=$('#uF').disabled=sym;
+  $('#constructorTitle').textContent='Конструктор рамы от узла A';
+  const lengthUnit=$('#uL').value,forceUnit=$('#uF').value;
+  const momentUnit=forceUnit+'·'+lengthUnit;
+  const momentFactor=sym?1:UK.tor.F[$('#beamMomentUnit').value]/(U.F[forceUnit]*U.L[lengthUnit]);
+  const plus=padd, neg=pneg, mul=pmul, scale=psc;
+  const sub=(a,b)=>plus(a,neg(b));
+  const read=(row,i,key)=>readAt(rowField(i,key),()=>sym?parse(row[key]):pc(finiteInput(row[key])));
+  const ev=p=>peval(p,new Proxy({π:Math.PI},{get:(object,key)=>object[key]??1}));
+  const fmt=p=>sym?ps(p):f(ev(p));
+  const coordinates=point=>point.map(ev);
+  const units=[sym?'':forceUnit,sym?'':forceUnit,sym?'':momentUnit];
+  const lengthSuffix=sym?'':' '+lengthUnit;
+  const zero=()=>[{}, {}, {}];
+  const sumW=(a,b)=>a.map((p,i)=>plus(p,b[i]));
+  const wrench=(pos,H,V,M)=>[H,V,plus(sub(mul(pos[0],V),mul(pos[1],H)),M)];
+  const momentAt=(w,pos)=>sub(w[2],sub(mul(pos[0],w[1]),mul(pos[1],w[0])));
+  let preview=false;
+  const renderPreview=report=>{
+    $('#svgs').innerHTML=diagramScroll(frameDrawing(report,null));
+    preview=true;
+  };
+  try{
+    const nodes=[[{},{}]], members=[], applied=[];
+    rows.forEach((row,i)=>{
+      const p=Number(row.P), direction=frameDirections[row.D], L=read(row,i,'L');
+      if(!Number.isInteger(p)||p<0||p>i||!direction)throw validationError('Укажите существующий начальный узел и направление стержня.',rowField(i,'P'),rowField(i,'D'));
+      if(!Number.isFinite(ev(L))||ev(L)<=0)throw validationError('Длина стержня должна быть положительной.',rowField(i,'L'));
+      const start=nodes[p],end=start.map((v,k)=>plus(v,scale(L,direction[k])));
+      const [a,b]=[start,end].map(coordinates);
+      if(nodes.some(point=>coordinates(point).every((v,k)=>Math.abs(v-b[k])<1e-9))||
+        members.some(member=>frameIntersection(a,b,coordinates(nodes[member.p]),coordinates(nodes[member.node])))){
+        throw validationError('Стержень '+(i+1)+' пересекает раму или замыкает контур. Проверьте геометрию.',rowField(i,'P'),rowField(i,'D'),rowField(i,'L'));
+      }
+      const node=i+1;
+      nodes.push(end);
+      members.push({p,node,L,direction,normal:[-direction[1],direction[0]],q:{}});
+    });
+    const baseReport={nodes,members,applied:[],reactions:[],results:[],ev,fmt,sym,axis,units,lengthSuffix,internal};
+    renderPreview(baseReport);
+    members.forEach((m,i)=>{
+      const row=rows[i],q=read(row,i,'q'),H=read(row,i,'H'),V=read(row,i,'V'),M=scale(read(row,i,'M'),momentFactor);
+      const center=nodes[m.p].map((v,k)=>plus(v,scale(m.L,m.direction[k]/2)));
+      const qL=mul(q,m.L);
+      m.q=q;
+      m.distributed=wrench(center,scale(qL,m.normal[0]),scale(qL,m.normal[1]),{});
+      applied.push({node:m.node,H,V,M});
+    });
+    const start={node:0,H:readStartLoad('startH',sym),V:readStartLoad('startV',sym),
+      M:scale(readStartLoad('startM',sym),momentFactor)};
+    for(const key of ['H','V','M']){
+      if(!Number.isFinite(ev(start[key])))throw validationError('Нагрузка в начальном узле должна быть конечной.','#start'+key);
+    }
+    applied.unshift(start);
+    const supportNodes=['frameA','frameB','frameC'].slice(0,type==='none'?0:type==='fixed'?1:type==='pins'?2:3).map(key=>Number($('#'+key).value));
+    const supports=supportNodes.filter(node=>nodes[node]).map((node,i)=>({
+      node,H:{},V:{},M:{},type:type==='fixed'?'fixed':type==='pins'&&i===0?'pin':'roller',
+      roll:i===2?(roll==='h'?'y':'h'):roll
+    }));
+    const blockedKeys=support=>!support?[]:support.type==='roller'
+      ?[support.roll==='h'?'H':'V']:support.type==='fixed'?['H','V','M']:['H','V'];
+    const blockedLoads=applied.flatMap(load=>blockedKeys(supports.find(support=>support.node===load.node))
+      .filter(key=>Object.keys(load[key]).length).map(key=>({node:load.node,key})));
+    const previewLoads=applied.map(load=>{
+      const allowed={...load};
+      blockedKeys(supports.find(support=>support.node===load.node)).forEach(key=>allowed[key]={});
+      return allowed;
+    });
+    renderPreview({...baseReport,applied:previewLoads,reactions:supports});
+    if(type==='none')throw validationError('Выберите опорную схему, чтобы рассчитать реакции и эпюры.','#frameType');
+    const supportFields=['#frameA','#frameB','#frameC'].slice(0,supportNodes.length);
+    if(supportNodes.some(i=>!nodes[i])||new Set(supportNodes).size!==supportNodes.length)throw validationError('Выберите разные узлы опор.',...supportFields);
+    if(type==='fixed'&&members.filter(m=>m.p===supportNodes[0]||m.node===supportNodes[0]).length!==1){
+      throw validationError('Жёсткую заделку можно поставить только в концевом узле. Стержни не могут продолжаться за заделкой.','#frameA');
+    }
+    if(blockedLoads.length){
+      const {node,key}=blockedLoads[0],support=supports.find(s=>s.node===node);
+      const description=key==='M'?'момент в узле заделки':support.type==='roller'
+        ?'силу вдоль направления реакции подвижной опоры в узле':'сосредоточенную силу в узле опоры';
+      throw validationError('Уберите '+description+' '+frameNodeName(node)+'.',...blockedLoads.map(item=>item.node===0?'#start'+item.key:rowField(item.node-1,item.key)));
+    }
+    const loads=applied.map(a=>wrench(nodes[a.node],a.H,a.V,a.M)).concat(members.map(m=>m.distributed));
+    const external=loads.reduce(sumW,zero());
+    const a=supportNodes[0];
+    let reactions;
+    if(type==='fixed'){
+      reactions=[{node:a,H:neg(external[0]),V:neg(external[1]),M:neg(momentAt(external,nodes[a])),type:'fixed'}];
+    }else{
+      const [first,second,third]=supportNodes;
+      const horizontal=roll==='h', forceIndex=horizontal?0:1, armIndex=horizontal?1:0;
+      const sign=horizontal?-1:1;
+      const arm=scale(sub(nodes[second][armIndex],nodes[first][armIndex]),sign);
+      if(Math.abs(ev(arm))<1e-9)throw validationError('Опоры не удерживают раму от поворота. Разнесите линии действия параллельных реакций.','#frameA','#frameB','#frameRoll');
+      const across=neg(external[1-forceIndex]);
+      const acrossNode=type==='pins'?first:third;
+      const acrossW=wrench(nodes[acrossNode],horizontal?{}:across,horizontal?across:{},{});
+      if(sym&&Object.keys(arm).length!==1)throw validationError('В буквенном режиме плечо между параллельными реакциями должно быть одночленом. Задайте длины через общий символ l.','#frameA','#frameB','#frameRoll','#tb [data-k="L"]');
+      const alongSecond=pdiv(neg(momentAt(sumW(external,acrossW),nodes[first])),arm);
+      const alongFirst=neg(plus(external[forceIndex],alongSecond));
+      const reaction=(node,along,other,type)=>({node,H:horizontal?along:other,V:horizontal?other:along,M:{},type,roll:node===third?(horizontal?'y':'h'):roll});
+      reactions=[reaction(first,alongFirst,type==='pins'?across:{},type==='pins'?'pin':'roller'),
+        reaction(second,alongSecond,{},'roller')];
+      if(type==='rollers')reactions.push(reaction(third,{},across,'roller'));
+    }
+    const subtree=nodes.map(zero);
+    for(const load of [...applied,...reactions])subtree[load.node]=sumW(subtree[load.node],wrench(nodes[load.node],load.H,load.V,load.M));
+    const results=members.map(()=>null);
+    for(let i=members.length-1;i>=0;i--){
+      const m=members[i],w=subtree[m.node];
+      const dot=(x,y,d)=>plus(scale(x,d[0]),scale(y,d[1]));
+      const N=dot(w[0],w[1],m.direction);
+      const Q=neg(plus(dot(w[0],w[1],m.normal),mul(m.q,m.L)));
+      const M=momentAt(sumW(w,m.distributed),nodes[m.p]);
+      const halfQ=scale(m.q,.5);
+      const plotForward=(m.direction[0]||m.direction[1])===1;
+      const forward=ltr?plotForward:!plotForward;
+      const Qend=plus(Q,mul(m.q,m.L));
+      const Mend=plus(plus(M,mul(Q,m.L)),mul(halfQ,mul(m.L,m.L)));
+      const forwardTerms=[[N],[Q,m.q],[M,Q,halfQ]];
+      const reverseTerms=[[N],[Qend,neg(m.q)],[neg(Mend),Qend,neg(halfQ)]];
+      results[i]={forward,terms:forward?forwardTerms:reverseTerms,
+        plotForward,plotTerms:plotForward?forwardTerms:reverseTerms};
+      subtree[m.p]=sumW(subtree[m.p],sumW(w,m.distributed));
+    }
+    const momentPeak=(terms,i)=>{
+      const [q0,slope]=terms[1],m0=terms[2][0];
+      const length=ev(members[i].L),left=ev(q0),gradient=ev(slope),right=left+gradient*length;
+      if(!crossesZero(left,right))return null;
+      const x=-left/gradient, moment=ev(m0)+left*x/2;
+      const denominator=scale(slope,2);
+      const numerator=sub(mul(m0,denominator),mul(q0,q0));
+      const root=sym?polynomialRatio(neg(q0),slope):fraction(f(-left),f(gradient))+' = '+f(x)+lengthSuffix;
+      const value=sym?polynomialRatio(numerator,denominator):f(moment);
+      const magnitude=sym?polynomialRatio(moment<0?neg(numerator):numerator,denominator):f(Math.abs(moment));
+      return {t:x/length,root,value,magnitude,moment,kind:left>0?'максимум':'минимум'};
+    };
+    const plotPeaks=results.map((result,i)=>momentPeak(result.plotTerms,i));
+    const peaks=ltr?plotPeaks:results.map((result,i)=>momentPeak(result.terms,i));
+    const report={nodes,members,applied,reactions,results,plotPeaks,ev,fmt,sym,axis,units,lengthSuffix,internal};
+    const reactionText=reactions.flatMap(r=>[
+      effortMark('R',axis,frameNodeName(r.node))+' = '+fmt(r.H)+(sym?'':' '+forceUnit),
+      effortMark('R','y',frameNodeName(r.node))+' = '+fmt(r.V)+(sym?'':' '+forceUnit),
+      ...(r.type==='fixed'?[effortMark('M',momentAxis(axis),frameNodeName(r.node))+' = '+fmt(r.M)+(sym?'':' '+momentUnit)]:[])
+    ]).join('; ');
+    $('#svgs').innerHTML=[null,0,1,2].map(k=>diagramScroll(frameDrawing(report,k))).join('');
+    const order=members.map((_,i)=>i);
+    if(!ltr)order.reverse();
+    const valueWithUnit=(value,unit)=>fmt(value)+(sym?'':' '+unit);
+    const grouped=text=>/ [−+] /.test(text)?'('+text+')':text;
+    const momentContributions=(i,x,sign=1)=>{
+      const m=members[i],{forward}=results[i];
+      const retained=frameRetainedNodes(members,i,forward);
+      const origin=nodes[forward?m.p:m.node];
+      const direction=m.direction.map(value=>value*(forward?1:-1));
+      const product=(load,unit,factors,offset,slope)=>{
+        if(!Object.keys(load).length||(!Object.keys(offset).length&&!slope))return '0';
+        if(ev(offset)+slope*ev(m.L)/2<0){
+          load=neg(load);
+          offset=neg(offset);
+          slope=-slope;
+        }
+        const offsetText=fmt(offset);
+        const variable=slope<0?'−'+x:slope>0?x:'0';
+        const arm=sym?sectionFunction([offset,pc(slope)],x,true)
+          :offsetText==='0'?variable:equilibriumTerms(offsetText+lengthSuffix,[variable]);
+        return [grouped(valueWithUnit(load,unit)),...factors,grouped(arm)].join(' · ');
+      };
+      const terms=[...applied,...reactions].filter(load=>retained.has(load.node)).flatMap(load=>{
+        const point=nodes[load.node];
+        return [
+          product(scale(load.H,sign),forceUnit,[],sub(point[1],origin[1]),-direction[1]),
+          product(scale(load.V,-sign),forceUnit,[],sub(point[0],origin[0]),-direction[0]),
+          Object.keys(load.M).length?valueWithUnit(scale(load.M,-sign),momentUnit):'0'
+        ];
+      });
+      for(const member of members){
+        if(!retained.has(member.p)||!retained.has(member.node))continue;
+        const center=nodes[member.p].map((value,k)=>plus(value,scale(member.L,member.direction[k]/2)));
+        const offset=center.reduce((sum,value,k)=>plus(sum,scale(sub(value,origin[k]),member.direction[k])),{});
+        const slope=-direction.reduce((sum,value,k)=>sum+value*member.direction[k],0);
+        terms.push(product(scale(member.q,-sign),forceUnit+'/'+lengthUnit,[valueWithUnit(member.L,lengthUnit)],offset,slope));
+      }
+      if(Object.keys(m.q).length){
+        terms.push(grouped(valueWithUnit(scale(m.q,sign*(forward?1:-1)),forceUnit+'/'+lengthUnit))+
+          ' · '+x+' · '+fraction(x,'2'));
+      }
+      return terms.filter(term=>term!=='0');
+    };
+    const variables=['N','Q','M'];
+    let solution=`<p><b>Реакции опор</b><br>ΣF<sub>${axis}</sub> = 0, ΣF<sub>y</sub> = 0, ΣM<sub>${frameNodeName(a)}</sub> = 0<br>${reactionText}</p><h3>Функции и значения по стержням</h3>`;
+    order.forEach(i=>{
+      const m=members[i], result=results[i], x=axis+subscript(i+1);
+      const functions=result.terms.map((terms,k)=>variables[k]+'('+x+') = '+sectionFunction(sym?terms:terms.map(ev),x,sym,units[k],lengthUnit));
+      printFunctions.push(`<p><b>Стержень ${i+1}</b><br>${functions.join('<br>')}</p>`);
+      const terms=momentContributions(i,x);
+      functions[2]='M('+x+') = '+(terms.length?equilibriumTerms(terms[0],terms.slice(1)):'0');
+      const balance=internal?result.terms.map((terms,k)=>{
+        const sign=[1,-1,ltr?1:-1][k];
+        const projection=['ΣF вдоль стержня','ΣF поперёк стержня','ΣM относительно разреза'][k];
+        const effort=(sign<0?'−':'')+variables[k]+'('+x+')';
+        if(k===2)return projection+' = 0 → '+equilibriumTerms(effort,momentContributions(i,x,-sign))+' = 0<br>';
+        const external=terms.map(term=>scale(term,-sign));
+        const equation=sectionFunction(sym?external:external.map(ev),x,sym,units[k],lengthUnit);
+        return cutEquilibrium(projection,effort,equation);
+      }).join(''):'';
+
+      const length=fmt(m.L)+lengthSuffix;
+      const endValues=result.terms.map(terms=>fmt(terms.reduce((acc,term,j)=>plus(acc,mul(term,ppow(m.L,j))),{})));
+      const peak=peaks[i];
+      const effort='Q('+x+') = '+sectionFunction(sym?result.terms[1]:result.terms[1].map(ev),x,sym,units[1],lengthUnit);
+      const extremum=peak?extremumText(peak.kind,effort,x,peak.root,'M',peak.value+(sym?'':' '+momentUnit),sym):'';
+      solution+=`<h4>Стержень ${i+1}</h4><div class="cutbox">${diagramScroll(frameDrawing(report,null,i))}</div>
+        <p>0 ≤ ${x} ≤ ${length}<br>${balance}${functions.join('<br>')}${extremum}</p>`+
+        sectionTable(x,length,variables.map((v,j)=>v+(units[j]?' '+units[j]:'')),result.terms.map(t=>fmt(t[0])),endValues);
+    });
+    $('#sol').innerHTML=solution;
+    $('#hint').hidden=false;
+    $('#hint').textContent='Стержни соединяются жёстко. Силы и моменты задаются в конечном узле. Положительная q направлена влево от стержня, если смотреть от начального узла к конечному. Горизонтальные силы положительны вправо, вертикальные вверх, моменты против часовой стрелки.';
+    $('#out').hidden=false;$('#err').hidden=true;
+  }catch(error){
+    $('#out').hidden=!preview;
+    $('#solutionCard').hidden=true;
+    $('#sol').innerHTML='';
+    $('#err').hidden=false;
+    $('#err').textContent=error.message;
+  }
+}
+function frameDrawing(v,kind,cut){
+  const {nodes,members,applied,reactions,results,ev,fmt,sym,axis,units,lengthSuffix,internal}=v;
+  const coordinates=nodes.map(point=>point.map(ev));
+  const retained=cut===undefined?new Set(nodes.map((_,i)=>i)):frameRetainedNodes(members,cut,results[cut].forward);
+  const visible=members.flatMap((m,i)=>{
+    if(i===cut)return [{...m,i,partial:true}];
+    return retained.has(m.p)&&retained.has(m.node)?[{...m,i,partial:false}]:[];
+  });
+  const transverse=direction=>direction[0]?[0,-1]:[-1,0];
+  const midpoint=(a,b)=>a.map((value,k)=>(value+b[k])/2);
+  const move=(a,d,t)=>a.map((value,k)=>value+t*d[k]);
+  const coordinatesInView=Array.from(retained,i=>coordinates[i]);
+  if(cut!==undefined)coordinatesInView.push(midpoint(coordinates[members[cut].p],coordinates[members[cut].node]));
+  const xs=coordinatesInView.map(p=>p[0]),ys=coordinatesInView.map(p=>p[1]);
+  const left=Math.min(...xs),bottom=Math.min(...ys),width=Math.max(...xs)-left,height=Math.max(...ys)-bottom;
+  const baseScale=Math.min(width?560/width:Infinity,height?236/height:Infinity);
+  const shortest=Math.min(...visible.map(m=>ev(m.L)*(m.partial ? .5 : 1)));
+  const scale=Math.max(baseScale,Math.min(2*baseScale,100/shortest));
+  const canvasWidth=Math.max(820,Math.ceil(width*scale+250));
+  const canvasHeight=Math.max(378,Math.ceil(height*scale+142));
+  const points=coordinates.map(([x,y])=>[canvasWidth/2+(x-left-width/2)*scale,canvasHeight/2-(y-bottom-height/2)*scale]);
+  const cutPoint=cut===undefined?null:midpoint(points[members[cut].p],points[members[cut].node]);
+  const ends=m=>m.partial
+    ?(results[m.i].forward?[points[m.p],cutPoint]:[cutPoint,points[m.node]])
+    :[points[m.p],points[m.node]];
+  const color={load:'var(--red)',q:'var(--green)',reaction:'var(--orange)',axis:'var(--muted-ink)',cut:'var(--a)'};
+  const id='frame-'+(cut===undefined?(kind===null?'main':kind):'cut'+cut);
+  const obstacles=[],labels=[];
+  const box=(x,y,w,h)=>({x,y,w,h});
+  const overlaps=(a,b)=>a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
+  const reserve=(a,b,padding=3)=>obstacles.push(box(Math.min(a[0],b[0])-padding,Math.min(a[1],b[1])-padding,Math.abs(a[0]-b[0])+2*padding,Math.abs(a[1]-b[1])+2*padding));
+  const line=(a,b,ink,arrow=false,w=1.5)=>{
+    reserve(a,b,arrow?5:Math.max(2,w));
+    return `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="${color[ink]||ink}" stroke-width="${w}"${arrow?' marker-end="url(#'+id+'-'+ink+')"':''}/>`;
+  };
+  const text=(a,label,ink='var(--ink)')=>`<text x="${a[0]}" y="${a[1]}" text-anchor="middle" font-size="12" fill="${color[ink]||ink}">${label}</text>`;
+  const annotate=(position,label,ink,side=null,anchor=position)=>labels.push({position,label,ink,side,anchor});
+  const couple=(a,value,ink)=>{
+    const sign=Math.sign(value),top=move(a,[0,-1],11),low=move(a,[0,1],11);
+    reserve(move(a,[-1,-1],25),move(a,[1,1],25),0);
+    return `<g transform="rotate(-20 ${a.join(' ')})">${line(top,low,ink)+line(top,move(top,[-sign,0],20),ink,true)+line(low,move(low,[sign,0],20),ink,true)}</g>`;
+  };
+  const incident=(node,direction)=>visible.some(m=>{
+    if(m.p!==node&&m.node!==node)return false;
+    const sign=m.p===node?1:-1;
+    return direction[0]===sign*m.direction[0]&&direction[1]===-sign*m.direction[1];
+  });
+  const freeSide=(node,preferred)=>incident(node,preferred)?preferred.map(value=>-value):preferred;
+  let svg=`<svg viewBox="0 0 ${canvasWidth} ${canvasHeight}"><defs>${Object.entries(color).map(([key,c])=>MK(id+'-'+key,c).replace('refX="1.6"','refX="9.4"')).join('')}</defs>`;
+  visible.forEach(m=>{const [a,b]=ends(m);svg+=line(a,b,'var(--ink)',false,kind===null?3:1.4)});
+  if(kind!==null){
+    const names=['N','Q','M'],ink=internal?'var(--a)':'var(--red)';
+    const series=members.map((m,i)=>{
+      const terms=results[i].plotTerms[kind],L=ev(m.L),value=t=>terms.reduce((sum,term,k)=>sum+ev(term)*(t*L)**k,0);
+      const fractions=Array.from({length:21},(_,j)=>j/20);
+      const peak=kind===2?v.plotPeaks[i]:null;
+      const zero=kind===1&&ev(terms[1])?-ev(terms[0])/(ev(terms[1])*L):null;
+      for(const t of [peak?.t,zero])if(t>0&&t<1)fractions.push(t);
+      return {terms,value,peak,zero,samples:fractions.sort((a,b)=>a-b).map(t=>[t,value(t)])};
+    });
+    const max=Math.max(...series.flatMap(item=>item.samples.map(([,value])=>Math.abs(value))))||1;
+    svg+=text([canvasWidth/2,20],'Эпюра '+names[kind]+(units[kind]?', '+units[kind]:''));
+    reserve([canvasWidth/2-90,6],[canvasWidth/2+90,24],2);
+    let badges='';
+    members.forEach((m,i)=>{
+      const r=results[i],item=series[i],start=points[r.plotForward?m.p:m.node],end=points[r.plotForward?m.node:m.p];
+      const normal=transverse(m.direction);
+      const at=(fraction,value)=>move(start.map((x,k)=>x+fraction*(end[k]-x)),normal,33*value/max);
+      const outline=item.samples.map(([fraction,value])=>at(fraction,value));
+      outline.slice(1).forEach((point,j)=>reserve(outline[j],point,1));
+      svg+=`<polygon points="${start.join(',')} ${outline.map(point=>point.join(',')).join(' ')} ${end.join(',')}" fill="${ink}" fill-opacity=".15" stroke="${ink}" stroke-width="1.5"/>`;
+      if(item.peak){
+        const peak=item.peak, point=at(peak.t,peak.moment);
+        reserve(point,point,5);
+        svg+=`<circle cx="${point[0]}" cy="${point[1]}" r="3.5" fill="${ink}" stroke="var(--c)"/>`;
+        annotate(move(point,normal,peak.moment<0?-17:17),peak.magnitude,ink);
+      }
+      const endValue=item.terms.reduce((sum,term,k)=>padd(sum,pmul(term,ppow(m.L,k))),{});
+      const magnitude=p=>fmt(ev(p)<0?pneg(p):p);
+      const values=[[.08,item.value(0),magnitude(item.terms[0])]];
+      if(item.terms.slice(1).some(term=>Object.keys(term).length))values.push([.92,item.value(1),magnitude(endValue)]);
+      values.forEach(([fraction,value,label])=>{
+        if(label!=='0')annotate(move(at(fraction,value),normal,value<0?-15:15),label,ink);
+      });
+      if(kind!==2){
+        const boundaries=item.zero>0&&item.zero<1?[0,item.zero,1]:[0,1];
+        const span=Math.hypot(end[0]-start[0],end[1]-start[1]);
+        const outerSlope=33*(item.value(1)-item.value(0))/(max*span);
+        const stroke=internal?'#2563eb':'#b42318';
+        boundaries.slice(1).forEach((right,j)=>{
+          const left=boundaries[j],fraction=(left+right)/2,value=item.value(fraction);
+          if(!value)return;
+          const halfHeight=33*Math.abs(value)/(2*max);
+          const clearance=Math.min(halfHeight/Math.hypot(1,outerSlope),(right-left)*span/2);
+          const radius=Math.min(9,clearance*.88);
+          if(!(radius>0))return;
+          const [x,y]=at(fraction,value*.5),strokeWidth=Math.min(1.4,radius*.2);
+          reserve([x-radius,y-radius],[x+radius,y+radius],1);
+          badges+=`<circle cx="${x}" cy="${y}" r="${radius}" fill="#fff" stroke="${stroke}" stroke-width="${strokeWidth}"/><text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle" font-size="${radius*15/9}" font-weight="700" fill="${stroke}">${value>0?'+':'−'}</text>`;
+        });
+      }
+    });
+    svg+=badges;
+  }else{
+    if(cut===undefined){
+      svg+=line([36,canvasHeight-37],[74,canvasHeight-37],'axis',true)+line([36,canvasHeight-37],[36,canvasHeight-73],'axis',true);
+      annotate([85,canvasHeight-37],axis,'axis');
+      annotate([36,canvasHeight-84],'y','axis');
+    }
+    visible.forEach(m=>{
+      const [a,b]=ends(m),middle=midpoint(a,b),normal=[-m.normal[0],m.normal[1]],q=ev(m.q);
+      const side=normal.map(value=>value*Math.sign(q));
+      if(!m.partial){
+        const lengthSide=q?side.map(value=>-value):normal;
+        annotate(move(middle,lengthSide,23),(sym?'':'L = ')+fmt(m.L)+lengthSuffix,'var(--secondary-ink)',lengthSide,middle);
+      }
+      if(!q)return;
+      svg+=line(move(a,side,25),move(b,side,25),'q');
+      const count=Math.max(1,Math.min(16,Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])/23)));
+      for(let j=0;j<=count;j++){
+        const anchor=a.map((x,k)=>x+(b[k]-x)*j/count);
+        svg+=line(move(anchor,side,25),anchor,'q',true);
+      }
+      annotate(move(middle,side,46),fmt(q<0?pneg(m.q):m.q)+(sym?'':' '+units[0]+'/'+lengthSuffix.trim()),'q',side,move(middle,side,30));
+    });
+    const supportSides=new Map();
+    reactions.filter(r=>retained.has(r.node)).forEach(r=>{
+      const node=points[r.node];
+      let side;
+      if(r.type==='fixed'){
+        const edge=members.find(m=>m.p===r.node||m.node===r.node);
+        side=edge.direction.map((value,k)=>value*(edge.p===r.node?-1:1)*(k?-1:1));
+      }else if(r.type==='roller')side=freeSide(r.node,r.roll==='h'?[-1,0]:[0,1]);
+      else side=[[0,1],[0,-1],[-1,0],[1,0]].find(direction=>!incident(r.node,direction))||[0,1];
+      supportSides.set(r.node,side);
+      const tangent=[side[1],-side[0]];
+      const offset=incident(r.node,side)?22:0;
+      const origin=move(node,tangent,offset);
+      if(r.type==='fixed'){
+        svg+=line(move(origin,tangent,-14),move(origin,tangent,14),'var(--ink)',false,3);
+        for(let j=-12;j<=12;j+=6)svg+=line(move(origin,tangent,j),move(move(origin,tangent,j+5),side,8),'var(--ink)');
+      }else{
+        const a=move(move(origin,side,15),tangent,-10),b=move(move(origin,side,15),tangent,10);
+        reserve(move(origin,[-1,-1],26),move(origin,[1,1],26),0);
+        svg+=`<path d="M${node.join(' ')}L${a.join(' ')}L${b.join(' ')}Z" fill="var(--c)" stroke="var(--ink)"/>`;
+        const roller=r.type==='roller',ground=move(origin,side,roller?23:16);
+        if(roller)for(const d of [-5,5]){
+          const center=move(move(origin,side,19),tangent,d);
+          svg+=`<circle cx="${center[0]}" cy="${center[1]}" r="2.5" fill="var(--c)" stroke="var(--ink)"/>`;
+        }
+        svg+=line(move(ground,tangent,-13),move(ground,tangent,13),'var(--ink)');
+      }
+    });
+    [...applied,...reactions].filter(load=>retained.has(load.node)).forEach(load=>{
+      const reaction=!!load.type,ink=reaction?'reaction':'load',a=points[load.node];
+      const node=reaction?frameNodeName(load.node):undefined;
+      for(const [key,direction,axisName] of [['H',[1,0],axis],['V',[0,-1],'y']]){
+        const value=ev(load[key]);
+        if(!value)continue;
+        const forceDirection=direction.map(d=>d*Math.sign(value));
+        const preferred=forceDirection.map(d=>-d),supportSide=supportSides.get(load.node);
+        const avoidSupport=preferred.every((d,k)=>d===supportSide?.[k]);
+        const side=freeSide(load.node,avoidSupport?forceDirection:preferred);
+        const tangent=[-side[1],side[0]];
+        const needsOffset=!reaction&&(incident(load.node,side)||side.every((d,k)=>d===supportSide?.[k]));
+        const origin=move(a,tangent,needsOffset?19:0),tip=move(origin,side,34);
+        if(needsOffset)svg+=line(a,origin,'axis',false,1);
+        const inward=side.every((d,k)=>d===-forceDirection[k]);
+        svg+=line(inward?tip:origin,inward?origin:tip,ink,true,2);
+        annotate(move(tip,side,14),effortMark(reaction?'R':'F',axisName,node)+' = '+fmt(value<0?pneg(load[key]):load[key])+(sym?'':' '+units[0]),ink);
+      }
+      const m=ev(load.M);
+      if(m){
+        svg+=couple(a,m,ink);
+        const momentName=effortMark('M',momentAxis(axis),node);
+        annotate(move(a,[1,-1],31),momentName+' = '+fmt(m<0?pneg(load.M):load.M)+(sym?'':' '+units[2]),ink);
+      }
+    });
+    if(cut!==undefined){
+      const m=members[cut],r=results[cut],a=points[r.forward?m.p:m.node];
+      const direction=m.direction.map((d,k)=>d*(r.forward?1:-1)*(k?-1:1));
+      const normal=[direction[1],-direction[0]];
+      const yAxis=transverse(direction);
+      const projection=point=>point[0]*yAxis[0]+point[1]*yAxis[1];
+      const outerEdge=Math.max(...Array.from(retained,node=>projection(points[node])),projection(cutPoint));
+      const origin=move(a,yAxis,outerEdge-projection(a)+23);
+      const axisLabel=(point,value)=>{
+        reserve(move(point,[-1,-1],10),move(point,[1,1],10),0);
+        return `<text x="${point[0]}" y="${point[1]}" dominant-baseline="middle" text-anchor="middle" font-size="18" font-weight="700" fill="${color.axis}">${value}</text>`;
+      };
+      svg+=line(a,cutPoint,'cut',false,4);
+      svg+=line(move(cutPoint,normal,-8),move(cutPoint,normal,8),'axis',false,1.4);
+      svg+=line(origin,move(origin,direction,39),'axis',true,2.5)+line(origin,move(origin,yAxis,28),'axis',true,2.5);
+      svg+=axisLabel(move(origin,direction,53),axis+subscript(cut+1))+axisLabel(move(origin,yAxis,41),'y');
+      if(internal){
+        svg+=line(cutPoint,move(cutPoint,direction,30),'cut',true)+line(cutPoint,move(cutPoint,normal,-30),'cut',true);
+        annotate(move(cutPoint,direction,43),'N','cut');
+        annotate(move(cutPoint,normal,-43),'Q','cut');
+        const center=move(move(cutPoint,direction,13),normal,24);
+        const sign=(m.direction[0]||m.direction[1])*(r.forward?1:-1);
+        svg+=couple(center,sign,'cut');
+        annotate(move(center,normal,26),'M','cut');
+      }
+    }
+    retained.forEach(i=>annotate(move(points[i],[-1,-1],11),frameNodeName(i),'var(--ink)'));
+  }
+  let minX=0,minY=0,maxX=canvasWidth,maxY=canvasHeight;
+  for(const {position,label,ink,side,anchor} of labels){
+    const length=label.replace(/<[^>]*>/g,'').length;
+    const w=Math.min(230,Math.max(16,length*7+8)),h=label.includes('class="frac"')?30:18;
+    const offsets=[[0,0]];
+    for(let distance=12;distance<=120;distance+=12){
+      for(const d of [[0,-1],[0,1],[-1,0],[1,0],[-1,-1],[1,-1],[-1,1],[1,1]])offsets.push(d.map(x=>x*distance));
+    }
+    const candidates=offsets.map(offset=>position.map((x,k)=>x+offset[k]))
+      .map(([x,y])=>box(Math.max(2,Math.min(canvasWidth-w-2,x-w/2)),Math.max(2,Math.min(canvasHeight-h-2,y-h/2)),w,h))
+      .filter(b=>!side||((b.x+w/2-anchor[0])*side[0]+(b.y+h/2-anchor[1])*side[1]>0));
+    let placed=candidates.find(b=>!obstacles.some(other=>overlaps(b,other)));
+    if(!placed){
+      const [dx,dy]=side||[0,1];
+      placed=box(dx<0?minX-w-6:dx>0?maxX+6:Math.max(2,Math.min(canvasWidth-w-2,position[0]-w/2)),
+        dy<0?minY-h-6:dy>0?maxY+6:Math.max(2,Math.min(canvasHeight-h-2,position[1]-h/2)),w,h);
+      minX=Math.min(minX,placed.x-3);minY=Math.min(minY,placed.y-3);
+      maxX=Math.max(maxX,placed.x+w+3);maxY=Math.max(maxY,placed.y+h+3);
+    }
+    obstacles.push(placed);
+    svg+=`<foreignObject x="${placed.x}" y="${placed.y}" width="${w}" height="${h}"><div xmlns="http://www.w3.org/1999/xhtml" class="plot-label" style="font-size:${Math.min(11,w/Math.max(1,length)*1.65)}px;color:${color[ink]||ink}">${label}</div></foreignObject>`;
+  }
+  return svg.replace('viewBox="0 0 '+canvasWidth+' '+canvasHeight+'"',
+    'viewBox="'+[minX,minY,maxX-minX,maxY-minY].join(' ')+'"')+'</svg>';
+}
+
+setTask();build();calc();
+</script>
+</body>
+</html>
