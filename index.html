@@ -163,6 +163,7 @@ svg{width:100%;height:auto;display:block}
     <label>Режим<select id="mode"><option value="num">Числа</option><option value="sym">Буквы</option></select></label>
     <label><span id="axisLabel">Продольная ось</span><select id="axis"><option value="x">X</option><option value="z">Z</option></select></label>
     <label>Расчёт по<select id="solveBy"><option value="internal">Внутренним усилиям</option><option value="external">Внешним усилиям</option></select></label>
+    <label id="momentFiberLabel" hidden>Эпюра моментов на<select id="momentFiber"><option value="compression">сжатом волокне</option><option value="tension">растянутом волокне</option></select></label>
     <label id="beamTypeLabel" hidden>Опорная схема<select id="beamType"><option value="fixed">Консоль</option><option value="pins">Шарнирная схема</option></select></label>
     <label id="supportLabel">Заделка<select id="support"><option value="left">Слева</option><option value="right">Справа</option></select></label>
     <label>Анализ<select id="dir"><option value="ltr">слева-направо</option><option value="rtl">справа-налево</option></select></label>
@@ -257,7 +258,7 @@ function cutMeasure(a,b,y,text,marker){
 const arc=(x,y,dir,col,mk,ry,r)=>{r=r||8;const c=r*.7,mark=(cy,out)=>`<circle cx="${x}" cy="${cy}" r="${r}" fill="var(--c)" stroke="${col}" stroke-width="1.8"/>`+(out?`<circle cx="${x}" cy="${cy}" r="${r*.35}" fill="${col}"/>`:`<path d="M${x-c},${cy-c}L${x+c},${cy+c}M${x-c},${cy+c}L${x+c},${cy-c}" stroke="${col}" stroke-width="1.8"/>`);
   return mark(y-ry,dir>0)+mark(y+ry,dir<=0)};
 $('#E').oninput=calc;
-['axis','solveBy'].forEach(id=>$('#'+id).onchange=calc);
+['axis','solveBy','momentFiber'].forEach(id=>$('#'+id).onchange=calc);
 const mirrored=()=>$('#support').value==='right';
 const analysisFromLeft=()=>$('#dir').value==='ltr';
 const nodeLetter=(index,count)=>String.fromCharCode(65+(analysisFromLeft()?index:count-index));
@@ -516,7 +517,7 @@ function printCalculator(){
 window.addEventListener('beforeprint',preparePrintReport);
 const seedOptions={
   mode:['num','sym'],axis:['x','z'],solveBy:['internal','external'],
-  dir:['ltr','rtl'],support:['left','right']
+  dir:['ltr','rtl'],support:['left','right'],momentFiber:['compression','tension']
 };
 const seedTasks=['ax','tor','bend','frame'];
 const seedUnitKeys=['L','F','A','E'];
@@ -597,7 +598,7 @@ function decodeSeed(seed){
     return text;
   };
   const task=seedTasks[byte()],flags=byte();
-  if(!task||flags>=32)throw Error('Invalid seed settings');
+  if(!task||flags>=64)throw Error('Invalid seed settings');
   const settings=Object.fromEntries(Object.entries(seedOptions).map(([key,choices],i)=>[key,choices[(flags>>i)&1]]));
   const units=Object.fromEntries(seedUnitKeys.map(key=>[key,Object.keys(UK[task][key])[byte()]]));
   const state={task,settings,units};
@@ -618,6 +619,7 @@ function updateSeed(){
   const task=$('#task').value;
   const state={task,settings:{},units:{},rows:[]};
   for(const key of Object.keys(seedOptions))state.settings[key]=$('#'+key).value;
+  if(task!=='bend'&&task!=='frame')state.settings.momentFiber='compression';
   for(const key of ['L','F','A','E'])state.units[key]=$('#u'+key).value;
   if(task==='bend'){
     state.beam={type:$('#beamType').value,momentUnit:$('#beamMomentUnit').value,
@@ -638,6 +640,7 @@ function restoreSeed(seed){
   try{state=decodeSeed(seed)}catch{throw invalid()}
   if(!state||!['ax','tor','bend','frame'].includes(state.task))throw invalid();
   const {task,settings,units,modulus,beam}=state;
+  if(seed.startsWith('SC1-')&&settings&&typeof settings==='object')settings.momentFiber??='compression';
   const keys=seedRowKeys(task);
   if(!Array.isArray(state.rows)||state.rows.length<1||state.rows.length>10||
     state.rows.some(row=>!Array.isArray(row)||row.length!==keys.length||row.some(value=>typeof value!=='string')))throw invalid();
@@ -744,6 +747,7 @@ function renderCalculation(){
   $('#solutionCard').hidden=false;
   const beam=isBeam(),frame=isFrame();
   $('#frameSupports').hidden=!frame;
+  $('#momentFiberLabel').hidden=!beam&&!frame;
   $('#startLoads').hidden=!beam&&!frame;
   $('#startHLabel').hidden=!frame;
   if(beam||frame){
@@ -1160,7 +1164,7 @@ function calcBeam(){
     const momentBalance=equilibriumTerms(pins?reactionNames.b+' · '+arm:reactionNames.moment,momentTerms);
     $('#sol').innerHTML=`<p><b>Реакции опор</b><br>ΣFᵧ = 0 → ${forceBalance} = 0<br>
       ΣM относительно ${nodeLetter(ia,end)} = 0 → ${momentBalance} = 0<br>${reactionText}</p>`+
-      '<p>'+(internal?'В разрезе: Q '+(ltr?'вниз, M против часовой стрелки.':'вверх, M по часовой стрелке.'):'По внешним усилиям: Q положительна, если сила поворачивает отсечённую часть по часовой. M откладывается на стороне растянутых волокон.')+'</p>'+
+      '<p>'+(internal?'В разрезе: Q '+(ltr?'вниз, M против часовой стрелки.':'вверх, M по часовой стрелке.'):'По внешним усилиям: Q положительна, если сила поворачивает отсечённую часть по часовой.')+'</p>'+
       '<h3>Функции и значения по участкам</h3>'+
       order.map(i=>{
         const r=result[i],s=S[i],x=axis+subscript(n(i)),peak=peaks[i];
@@ -1301,6 +1305,7 @@ function beamDrawing(v,cut){
   }
   return svg+'</svg>';
 }
+const momentDiagramFactor=()=>$('#momentFiber').value==='tension'?-1:1;
 function beamPlot(v,k){
   const {S,nodes,ev,at,plain,fUnit,mUnit,internal}=v;
   const total=ev(nodes[S.length]), X=x=>80+660*x/total;
@@ -1310,7 +1315,8 @@ function beamPlot(v,k){
     return t.sort((a,b)=>a-b).map(t=>({t,p:at(i,t)[k]}));
   });
   const max=Math.max(...samples.flat().map(a=>Math.abs(ev(a.p))))||1;
-  const Y=p=>110-64*ev(p)/max, color=internal?'var(--a)':'var(--red)';
+  const side=k?momentDiagramFactor():1;
+  const Y=p=>110-64*ev(p)*side/max, color=internal?'var(--a)':'var(--red)';
   let svg=`<text x="5" y="15" font-size="13" font-weight="600">Эпюра ${k?'M'+mUnit:'Q'+fUnit}</text><line x1="65" y1="110" x2="755" y2="110" stroke="var(--ink)"/>`;
   nodes.forEach(node=>{
     const x=X(ev(node));
@@ -1333,7 +1339,7 @@ function beamPlot(v,k){
       if(value===undefined&&(!Object.keys(p).length||(t===0&&sameBoundary)||(t===1&&flat)))return;
       if(value!==undefined)svg+=`<circle cx="${x(t)}" cy="${Y(p)}" r="3" fill="${color}" stroke="var(--c)"/>`;
       const txt=value??plain(ev(p)<0?pneg(p):p), chars=txt.replace(/<[^>]+>/g,'').length;
-      const w=Math.min(810,Math.max(16,chars*7+5)),h=txt.includes('class="frac"')?24:12,up=ev(p)>=0;
+      const w=Math.min(810,Math.max(16,chars*7+5)),h=txt.includes('class="frac"')?24:12,up=ev(p)*side>=0;
       const b={x:Math.max(4,Math.min(816-w,x(t)+(t===1?-w-3:3))),y:Y(p)+(up?-h-3:3),w,h};
       while(boxes.some(a=>a.x<b.x+w+2&&a.x+a.w+2>b.x&&a.y<b.y+h+2&&a.y+a.h+2>b.y))b.y+=(up?-1:1)*(h+4);
       boxes.push(b);top=Math.min(top,b.y-4);bottom=Math.max(bottom,b.y+h+4);
@@ -1749,7 +1755,7 @@ function frameDrawing(v,kind,cut){
     let badges='';
     members.forEach((m,i)=>{
       const r=results[i],item=series[i],start=points[r.plotForward?m.p:m.node],end=points[r.plotForward?m.node:m.p];
-      const normal=transverse(m.direction);
+      const normal=transverse(m.direction).map(value=>kind===2?value*momentDiagramFactor():value);
       const at=(fraction,value)=>move(start.map((x,k)=>x+fraction*(end[k]-x)),normal,33*value/max);
       const outline=item.samples.map(([fraction,value])=>at(fraction,value));
       outline.slice(1).forEach((point,j)=>reserve(outline[j],point,1));
